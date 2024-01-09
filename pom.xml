@@ -29,7 +29,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>com.apolo.Main</mainClass>
+                    <mainClass>com.apolo.Apolo</mainClass>
                 </configuration>
             </plugin>
         </plugins>
