@@ -10,6 +10,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import java.awt.Color;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Apolo extends JFrame{
 
@@ -17,6 +28,37 @@ public class Apolo extends JFrame{
     Thread musicThread;
 
     public Apolo(){
+
+        //MENUBAR
+        JMenuBar mb = new JMenuBar();
+        add(mb);
+        mb.setBackground(new Color (255, 160, 0));
+        setJMenuBar(mb);
+
+
+        //menu responsável por abrir e fechar o arquivo serializado
+        JMenu file_menu = new JMenu("File");
+        JMenuItem open = new JMenuItem("open");
+        file_menu.add(open);
+        mb.add(file_menu);
+
+        open.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Specify a file to open");
+
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos MP3", "mp3"));
+
+                int result = fileChooser.showOpenDialog(null);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                    Play music = new Play(filePath);
+                }
+            }
+        });
+
+
 
         JButton play_button = new JButton("tocar musica");
         play_button.setBounds(485, 300, 100, 30);//posição e tamanho
@@ -51,7 +93,7 @@ public class Apolo extends JFrame{
 
         resume_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                music.resumePlayback();
+                music.resumePlayback(1000);
             }
 
         });

@@ -15,6 +15,8 @@ public class Play implements Runnable{
     private AdvancedPlayer player;
     private FileInputStream fileInputStream;
     private URL url;
+    private Bitstream bitstream;
+    private int pausedOnFrame = 0;
 
     public Play(String filePath) {
         try {
@@ -27,9 +29,6 @@ public class Play implements Runnable{
 
             // FileInputStream a partir da URL
             this.fileInputStream = new FileInputStream(url.getFile());
-
-            // Bitstream para decodificar o arquivo MP3
-            Bitstream bitstream = new Bitstream(fileInputStream);
 
             // AdvancedPlayer para reproduzir o arquivo MP3
             this.player = new AdvancedPlayer(fileInputStream);
@@ -59,12 +58,23 @@ public class Play implements Runnable{
                 }
             });
 
+            System.out.println("Reprodução iniciada!");
+
+            player.setPlayBackListener(new PlaybackListener() {
+                @Override
+                public void playbackFinished(PlaybackEvent event) {
+                    pausedOnFrame = event.getFrame();
+                }
+            });
+
             player.play();
+
 
         }
         catch (JavaLayerException e) {
             e.printStackTrace();
         }
+
     }
 
 
@@ -76,10 +86,30 @@ public class Play implements Runnable{
     }
 
 
-    public void resumePlayback() {
+    public void resumePlayback( int currentFrame ) {
+        try {
+            // Cria um novo FileInputStream a partir da URL
+            fileInputStream = new FileInputStream(url.getFile());
 
-        System.out.println("Reprodução retomada (não implementado)");
+            // Cria um novo AdvancedPlayer
+            player = new AdvancedPlayer(fileInputStream);
 
+            // Configura o listener para acompanhar o progresso da reprodução
+            player.setPlayBackListener(new PlaybackListener() {
+                @Override
+                public void playbackFinished(PlaybackEvent evt) {
+                    System.out.println("Reprodução concluída");
+                }
+            });
+
+            // Move para a posição pausada e inicia a reprodução
+            player.play( pausedOnFrame, Integer.MAX_VALUE);
+
+            System.out.println("Reprodução retomada");
+
+        } catch (JavaLayerException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
