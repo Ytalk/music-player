@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 
 import javax.swing.*;
+import java.awt.*;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,15 +21,21 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Font;
 
-
-
 import java.io.File;
+
 
 public class Apolo extends JFrame{
 
     Thread musicThread;
 
     public Apolo(){
+
+
+
+        //card
+        JPanel create_playlist = new JPanel();
+        CardLayout cardLayout = new CardLayout();
+        create_playlist.setLayout(cardLayout);
 
         //MENUBAR
         JMenuBar mb = new JMenuBar();
@@ -48,7 +55,7 @@ public class Apolo extends JFrame{
         open.setBackground(new Color(33, 41, 48));//cor do item suspenso
         file_menu.add(open);
 
-
+        //cor quando fica em cima
         file_menu.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 file_menu.setForeground(new Color(129, 13, 175));
@@ -59,7 +66,6 @@ public class Apolo extends JFrame{
             }
         });
 
-
         // Configurar a largura preferida do menu e do item do menu
         Dimension menuSize = new Dimension(50, 25);  // ajuste conforme necessário
         file_menu.setPreferredSize(menuSize);
@@ -67,10 +73,38 @@ public class Apolo extends JFrame{
 
         mb.add(file_menu);
 
-        Playlist playlist = new Playlist();
-        playlist.getPlaylist().setBounds(10, 10, 200, 150);
-        add( playlist.getPlaylist() );
 
+
+        //cria playlists
+        Playlist playlist = new Playlist("test");
+        create_playlist.add( playlist.getPlaylist(), "playlist test" );//adiciona panel playlist ao card de playlist
+
+        Playlist playlist2 = new Playlist("song");
+        create_playlist.add( playlist2.getPlaylist(), "playlist song" );//adiciona panel playlist ao card de playlist
+
+
+
+        // Crie uma lista principal com os nomes das playlists
+        String[] playlists = {"playlist test", "playlist song"};
+        JList<String> mainList = new JList<>(playlists);
+
+        //adicione um ouvinte para alternar entre playlists
+        mainList.addListSelectionListener(e -> {
+            String selectedPlaylist = mainList.getSelectedValue();
+            cardLayout.show(create_playlist, selectedPlaylist);
+        });
+
+        // Adicione a lista principal ao JFrame
+        create_playlist.setBounds(300, 200, 100, 300);//posição e tamanho
+        mainList.setBounds(100, 300, 100, 300);//posição e tamanho
+
+        add(mainList);
+        add(create_playlist);
+
+
+
+
+        //abrir musica
         open.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -92,10 +126,10 @@ public class Apolo extends JFrame{
 
 
 
+        //TOCAR MUSICA
         JButton play_button = new JButton("play");
         play_button.setBounds(485, 300, 100, 30);//posição e tamanho
         add(play_button);
-
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (musicThread == null || !musicThread.isAlive()) {
