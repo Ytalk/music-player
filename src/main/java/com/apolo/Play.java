@@ -9,6 +9,11 @@ import javazoom.jl.player.advanced.PlaybackListener;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.io.InputStream;
+
+import java.io.File;
+import java.io.FileInputStream;
+
 
 public class Play implements Runnable{
 
@@ -20,24 +25,28 @@ public class Play implements Runnable{
 
     public Play(String filePath) {
         try {
-            // URL do arquivo usando o class loader
-            this.url = Play.class.getClassLoader().getResource(filePath);
+            // Cria um objeto File com o caminho fornecido
+            File file = new File(filePath);
 
-            if (this.url == null) {
+            // Obtém o caminho absoluto
+            String absolutePath = file.getAbsolutePath();
+
+            // Cria um FileInputStream a partir do caminho absoluto
+            FileInputStream inputStream = new FileInputStream(absolutePath);
+
+            if (inputStream == null) {
                 throw new IOException("Arquivo não encontrado: " + filePath);
             }
 
-            // FileInputStream a partir da URL
-            this.fileInputStream = new FileInputStream(url.getFile());
-
             // AdvancedPlayer para reproduzir o arquivo MP3
-            this.player = new AdvancedPlayer(fileInputStream);
+            this.player = new AdvancedPlayer(inputStream);
 
-        }
-        catch (JavaLayerException | IOException e) {
+
+        } catch (JavaLayerException | IOException e) {
             e.printStackTrace();
         }
     }
+
 
 
     @Override
@@ -49,7 +58,7 @@ public class Play implements Runnable{
     public void play() {
 
         try {
-            //progresso da reprodução
+            // Progresso da reprodução
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
@@ -68,7 +77,6 @@ public class Play implements Runnable{
             });
 
             player.play();
-
 
         }
         catch (JavaLayerException e) {

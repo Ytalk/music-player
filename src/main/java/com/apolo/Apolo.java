@@ -4,6 +4,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 
+import javax.swing.*;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -14,59 +15,93 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JFileChooser;
+import javax. swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.Font;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+
+import java.io.File;
 
 public class Apolo extends JFrame{
 
-    Play music = new Play("mp3/Purple.mp3");
     Thread musicThread;
 
     public Apolo(){
 
         //MENUBAR
         JMenuBar mb = new JMenuBar();
-        add(mb);
-        mb.setBackground(new Color (255, 160, 0));
+        mb.setBackground(new Color (33, 41, 48));
         setJMenuBar(mb);
 
+        //mb.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        //menu responsável por abrir e fechar o arquivo serializado
+        //menu para adicionar path mp3 à JList
         JMenu file_menu = new JMenu("File");
-        JMenuItem open = new JMenuItem("open");
+        file_menu.setForeground(Color.WHITE);
+        file_menu.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        JMenuItem open = new JMenuItem("Open");
+        open.setForeground(Color.WHITE);
+        open.setFont(new Font("Arial", Font.PLAIN, 14));
+        open.setBackground(new Color(33, 41, 48));//cor do item suspenso
         file_menu.add(open);
+
+
+        file_menu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                file_menu.setForeground(new Color(129, 13, 175));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                file_menu.setForeground(Color.WHITE);
+            }
+        });
+
+
+        // Configurar a largura preferida do menu e do item do menu
+        Dimension menuSize = new Dimension(50, 25);  // ajuste conforme necessário
+        file_menu.setPreferredSize(menuSize);
+        open.setPreferredSize(menuSize);
+
         mb.add(file_menu);
 
-        open.addActionListener(new ActionListener(){
+        Playlist playlist = new Playlist();
+        playlist.getPlaylist().setBounds(10, 10, 200, 150);
+        add( playlist.getPlaylist() );
+
+        open.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e){
+            public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Specify a file to open");
 
-                fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos MP3", "mp3"));
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos MP3", "mp3");
+                fileChooser.setFileFilter(filter);
 
                 int result = fileChooser.showOpenDialog(null);
+
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-                    Play music = new Play(filePath);
+                    File selectedFile = fileChooser.getSelectedFile();
+                    String filePath = selectedFile.getAbsolutePath();
+                    playlist.addMusic(filePath);
                 }
             }
         });
 
 
 
-        JButton play_button = new JButton("tocar musica");
+        JButton play_button = new JButton("play");
         play_button.setBounds(485, 300, 100, 30);//posição e tamanho
         add(play_button);
 
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (musicThread == null || !musicThread.isAlive()) {
+                    String filePath = playlist.getMp3List().getSelectedValue();
+                    System.out.println(filePath);
+                    Play music = new Play(filePath);
                     musicThread = new Thread(music);
                     musicThread.start();
                 }
@@ -75,7 +110,7 @@ public class Apolo extends JFrame{
         });
 
 
-        JButton pause_button = new JButton("parar musica");
+        /*JButton pause_button = new JButton("parar musica");
         pause_button.setBounds(400, 200, 100, 30);//posição e tamanho
         add(pause_button);
 
@@ -96,7 +131,7 @@ public class Apolo extends JFrame{
                 music.resumePlayback(1000);
             }
 
-        });
+        });*/
 
 
         //DETALHES DO FRAME
