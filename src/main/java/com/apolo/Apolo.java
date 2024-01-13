@@ -4,11 +4,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 
-import javax.swing.*;
 import java.awt.*;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -20,28 +18,28 @@ import javax. swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Font;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.io.File;
 
 
 public class Apolo extends JFrame{
 
     Thread musicThread;
+    private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
+    private JList<String> mainList;
 
     public Apolo(){
 
+        this.playlists = new HashMap<>();
 
 
-        //card
-        JPanel create_playlist = new JPanel();
-        CardLayout cardLayout = new CardLayout();
-        create_playlist.setLayout(cardLayout);
+
 
         //MENUBAR
         JMenuBar mb = new JMenuBar();
         mb.setBackground(new Color (33, 41, 48));
         setJMenuBar(mb);
-
         //mb.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         //menu para adicionar path mp3 à JList
@@ -55,7 +53,7 @@ public class Apolo extends JFrame{
         open.setBackground(new Color(33, 41, 48));//cor do item suspenso
         file_menu.add(open);
 
-        //cor quando fica em cima
+        //cor da letra file quando fica em cima
         file_menu.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 file_menu.setForeground(new Color(129, 13, 175));
@@ -66,8 +64,8 @@ public class Apolo extends JFrame{
             }
         });
 
-        // Configurar a largura preferida do menu e do item do menu
-        Dimension menuSize = new Dimension(50, 25);  // ajuste conforme necessário
+        //configurar a largura
+        Dimension menuSize = new Dimension(50, 25);
         file_menu.setPreferredSize(menuSize);
         open.setPreferredSize(menuSize);
 
@@ -75,18 +73,30 @@ public class Apolo extends JFrame{
 
 
 
+
+        //CARD
+        JPanel create_playlist = new JPanel();
+        CardLayout cardLayout = new CardLayout();
+        create_playlist.setLayout(cardLayout);
+
+
+
+
         //cria playlists
         Playlist playlist = new Playlist("test");
-        create_playlist.add( playlist.getPlaylist(), "playlist test" );//adiciona panel playlist ao card de playlist
+        playlists.put("test", playlist);//adiciona playlist para mapeamento
+        create_playlist.add( playlist.getPlaylist(), "test" );//adiciona panel playlist ao card de playlist
 
         Playlist playlist2 = new Playlist("song");
-        create_playlist.add( playlist2.getPlaylist(), "playlist song" );//adiciona panel playlist ao card de playlist
+        playlists.put("song", playlist2);//adiciona playlist para mapeamento
+        create_playlist.add( playlist2.getPlaylist(), "song" );//adiciona panel playlist ao card de playlist
+
 
 
 
         // Crie uma lista principal com os nomes das playlists
-        String[] playlists = {"playlist test", "playlist song"};
-        JList<String> mainList = new JList<>(playlists);
+        String[] playlists = {"test", "song"};
+        mainList = new JList<>(playlists);
 
         //adicione um ouvinte para alternar entre playlists
         mainList.addListSelectionListener(e -> {
@@ -94,23 +104,22 @@ public class Apolo extends JFrame{
             cardLayout.show(create_playlist, selectedPlaylist);
         });
 
-        // Adicione a lista principal ao JFrame
+        // Adicione a lista principal e as playlists (card) ao JFrame
         create_playlist.setBounds(300, 200, 100, 300);//posição e tamanho
-        mainList.setBounds(100, 300, 100, 300);//posição e tamanho
-
-        add(mainList);
         add(create_playlist);
 
+        mainList.setBounds(100, 300, 100, 300);//posição e tamanho
+        add(mainList);
 
 
 
-        //abrir musica
+
+        //abrir ou deletar musica
         open.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Specify a file to open");
-
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos MP3", "mp3");
                 fileChooser.setFileFilter(filter);
 
@@ -119,10 +128,22 @@ public class Apolo extends JFrame{
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     String filePath = selectedFile.getAbsolutePath();
-                    playlist.addMusic(filePath);
+
+                    String selectedPlaylist = mainList.getSelectedValue();
+
+                    addMusic(selectedPlaylist, filePath);
                 }
             }
         });
+
+        JButton delete_button = new JButton("del msc");
+        delete_button.setBounds(485, 200, 100, 30);//posição e tamanho
+        add(delete_button);
+        delete_button.addActionListener(e -> {
+            String selectedPlaylist = mainList.getSelectedValue();
+            removeSelectedMusic(selectedPlaylist);
+        });
+
 
 
 
@@ -168,6 +189,8 @@ public class Apolo extends JFrame{
         });*/
 
 
+
+
         //DETALHES DO FRAME
         setLayout(null);
         setTitle("Harmonic Apolo");
@@ -177,6 +200,24 @@ public class Apolo extends JFrame{
         pack();//empacota/organiza
         setLocationRelativeTo(null);//centraliza
         setVisible(true);
+    }
+
+
+    public void addMusic(String playlistName, String path) {
+        Playlist playlist = playlists.get(playlistName);
+
+        if (playlist != null) {
+            playlist.addMusic(path);
+        }
+    }
+
+
+    public void removeSelectedMusic(String playlistName) {
+        Playlist playlist = playlists.get(playlistName);
+
+        if (playlist != null) {
+            playlist.removeSelectedMusic();
+        }
     }
 
 

@@ -7,22 +7,22 @@ import java.io.File;
 
 public class Playlist {
 
-    JScrollPane scrollPane;//representa a lista de musicas
+    JScrollPane scrollPane;//painel para scrollar a lista de musicas
     DefaultListModel<String> listModel;//representa o modelo/gerenciador da playlist
-    JList<String> mp3List;//
+    JList<String> mp3List;//representa a lista de musicas
     Label name;
-    JPanel playlist;
+    JPanel playlist;//painel com as informações de uma playlist
 
     public Playlist(String name) {
         this.name = new Label(name);
-        mp3List = new JList<>();
         listModel = new DefaultListModel<>();
+
+        mp3List = new JList<>();
         mp3List.setModel(listModel);
         mp3List.setCellRenderer(new FileNameCellRenderer());
-
         scrollPane = new JScrollPane(mp3List);
-        playlist = new JPanel(new BorderLayout());
 
+        playlist = new JPanel(new BorderLayout());
         playlist.add(this.name, BorderLayout.NORTH);
         playlist.add(scrollPane, BorderLayout.CENTER);
     }
@@ -34,7 +34,7 @@ public class Playlist {
 
 
     public void addMusic(String path){
-        this.listModel.addElement(path);
+        listModel.addElement(path);
     }
 
 
@@ -54,6 +54,13 @@ public class Playlist {
         }
     }
 
+
+    public void removeSelectedMusic() {
+        int selectedIndex = mp3List.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            listModel.remove(selectedIndex);
+        }
+    }
 
 
 }
