@@ -5,17 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 
 import java.awt.*;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.awt.Color;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JFileChooser;
-import javax. swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Font;
 import java.util.HashMap;
@@ -97,6 +88,7 @@ public class Apolo extends JFrame{
         // Crie uma lista principal com os nomes das playlists
         String[] playlists = {"test", "song"};
         mainList = new JList<>(playlists);
+        mainList.setBackground(new Color(64, 64, 64));
 
         //adicione um ouvinte para alternar entre playlists
         mainList.addListSelectionListener(e -> {
@@ -105,12 +97,22 @@ public class Apolo extends JFrame{
         });
 
         // Adicione a lista principal e as playlists (card) ao JFrame
-        create_playlist.setBounds(300, 200, 100, 300);//posição e tamanho
+        create_playlist.setBounds(250, 50, 500, 300);//posição e tamanho
         add(create_playlist);
 
-        mainList.setBounds(100, 300, 100, 300);//posição e tamanho
-        add(mainList);
+        JLabel mainList_label = new JLabel("Playlists");
+        mainList_label.setBounds(0, 0, 500, 30);
+        mainList_label.setBackground(new Color(33, 41, 48));
+        mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
+        mainList_label.setVerticalAlignment(SwingConstants.CENTER);
+        mainList_label.setFont(new Font("Arial", Font.BOLD, 20));
+        mainList_label.setForeground(Color.WHITE);
 
+        Panel mainList_panel = new Panel(new BorderLayout());
+        mainList_panel.setBounds(10, 50, 200, 300);//posição e tamanho
+        mainList_panel.add(mainList_label, BorderLayout.NORTH);
+        mainList_panel.add(mainList, BorderLayout.CENTER);
+        add(mainList_panel);
 
 
 
@@ -137,7 +139,7 @@ public class Apolo extends JFrame{
         });
 
         JButton delete_button = new JButton("del msc");
-        delete_button.setBounds(485, 200, 100, 30);//posição e tamanho
+        delete_button.setBounds(675, 370, 80, 20);//posição e tamanho
         add(delete_button);
         delete_button.addActionListener(e -> {
             String selectedPlaylist = mainList.getSelectedValue();
@@ -149,7 +151,7 @@ public class Apolo extends JFrame{
 
         //TOCAR MUSICA
         JButton play_button = new JButton("play");
-        play_button.setBounds(485, 300, 100, 30);//posição e tamanho
+        play_button.setBounds(250, 370, 80, 20);//posição e tamanho
         add(play_button);
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
