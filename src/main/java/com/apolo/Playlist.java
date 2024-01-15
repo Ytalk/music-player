@@ -39,6 +39,10 @@ public class Playlist {
     }
 
 
+    public String getName(){
+        return name.getText();
+    }
+
     public JPanel getPlaylist(){
         return playlist;
     }

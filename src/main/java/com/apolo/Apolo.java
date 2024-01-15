@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.Color;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
@@ -19,6 +21,8 @@ public class Apolo extends JFrame{
     Thread musicThread;
     private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
     private JList<String> mainList;
+    private Playlist playlist;
+
 
     public Apolo(){
 
@@ -31,7 +35,7 @@ public class Apolo extends JFrame{
         JMenuBar mb = new JMenuBar();
         mb.setBackground(new Color (33, 41, 48));
         setJMenuBar(mb);
-        //mb.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        mb.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         //menu para adicionar path mp3 à JList
         JMenu file_menu = new JMenu("File");
@@ -66,39 +70,61 @@ public class Apolo extends JFrame{
 
 
         //CARD
-        JPanel create_playlist = new JPanel();
+        JPanel playlists_panel = new JPanel();
         CardLayout cardLayout = new CardLayout();
-        create_playlist.setLayout(cardLayout);
+        playlists_panel.setLayout(cardLayout);
+        playlists_panel.setBackground(new Color( 129, 13, 175));
 
 
 
 
-        //cria playlists
-        Playlist playlist = new Playlist("test");
-        playlists.put("test", playlist);//adiciona playlist para mapeamento
-        create_playlist.add( playlist.getPlaylist(), "test" );//adiciona panel playlist ao card de playlist
-
-        Playlist playlist2 = new Playlist("song");
-        playlists.put("song", playlist2);//adiciona playlist para mapeamento
-        create_playlist.add( playlist2.getPlaylist(), "song" );//adiciona panel playlist ao card de playlist
-
-
-
-
-        // Crie uma lista principal com os nomes das playlists
-        String[] playlists = {"test", "song"};
-        mainList = new JList<>(playlists);
+        //CRIAR OU DELETAR PLAYLIST
+        mainList = new JList<>(new String[0]);
         mainList.setBackground(new Color(64, 64, 64));
+
+        JButton createPlaylistButton = new JButton("Criar playlist");
+        createPlaylistButton.setBounds(10, 370, 80, 20);// posição e tamanho
+        add(createPlaylistButton);
+
+        createPlaylistButton.addActionListener(e -> {
+            String playlistName = JOptionPane.showInputDialog("Digite o nome da nova playlist:");
+            if (playlistName != null && !playlistName.isEmpty()) {
+                playlist = new Playlist(playlistName);
+                playlists.put(playlistName, playlist);
+
+                // Atualiza a mainList com os nomes das playlists existentes
+                mainList.setListData(playlists.keySet().toArray(new String[0]));
+
+                // Adiciona a nova playlist ao cardLayout
+                playlists_panel.add(playlist.getPlaylist(), playlistName);
+            }
+        });
+
+        JButton delete_playlist_button = new JButton("Deletar playlist");
+        delete_playlist_button.setBounds(100, 370, 80, 20);// posição e tamanho
+        add(delete_playlist_button);
+
+        delete_playlist_button.addActionListener(e -> {
+                String playlist_name = mainList.getSelectedValue();
+                Playlist playlist = playlists.get(playlist_name);
+
+            if (playlist != null) {
+                playlists_panel.remove(playlist.getPlaylist());
+                playlists.remove(playlist_name);
+                mainList.setListData(playlists.keySet().toArray(new String[0]));
+            }
+        });
+
 
         //adicione um ouvinte para alternar entre playlists
         mainList.addListSelectionListener(e -> {
             String selectedPlaylist = mainList.getSelectedValue();
-            cardLayout.show(create_playlist, selectedPlaylist);
+            cardLayout.show(playlists_panel, selectedPlaylist);
         });
 
         // Adicione a lista principal e as playlists (card) ao JFrame
-        create_playlist.setBounds(250, 50, 500, 300);//posição e tamanho
-        add(create_playlist);
+        playlists_panel.setBounds(250, 50, 500, 300);//posição e tamanho
+        add(playlists_panel);
 
         JLabel mainList_label = new JLabel("Playlists");
         mainList_label.setBounds(0, 0, 500, 30);
@@ -155,7 +181,7 @@ public class Apolo extends JFrame{
         add(play_button);
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (musicThread == null || !musicThread.isAlive()) {
+                if ( (musicThread == null || !musicThread.isAlive()) && (playlist != null)) {
                     String filePath = playlist.getMp3List().getSelectedValue();
                     System.out.println(filePath);
                     Play music = new Play(filePath);
