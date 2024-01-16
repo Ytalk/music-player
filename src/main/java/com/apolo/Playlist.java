@@ -1,13 +1,11 @@
 package com.apolo;
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.BorderLayout;
 import java.io.File;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
-import java.awt.Dimension;
 
 public class Playlist {
 
@@ -63,7 +61,8 @@ public class Playlist {
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
             if (value instanceof String) {
-                value = new File((String) value).getName(); // Obtém apenas o nome do arquivo
+                value = new File((String) value).getName().replaceFirst("[.][^.]+$", "");//obtém apenas o nome do arquivo e retira extensão
+                
             }
             return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         }

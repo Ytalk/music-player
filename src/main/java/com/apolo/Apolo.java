@@ -4,14 +4,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Dimension;
 
-import java.awt.*;
 import javax.swing.*;
 import java.awt.Color;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
 
@@ -26,8 +22,9 @@ public class Apolo extends JFrame{
 
     public Apolo(){
 
-        this.playlists = new HashMap<>();
-
+        PlaylistManager playlist_manager = new PlaylistManager();
+        mainList = playlist_manager.getMainList();
+        playlists = playlist_manager.getMap();
 
 
 
@@ -68,77 +65,33 @@ public class Apolo extends JFrame{
 
 
 
-
-        //CARD
-        JPanel playlists_panel = new JPanel();
-        CardLayout cardLayout = new CardLayout();
-        playlists_panel.setLayout(cardLayout);
-        playlists_panel.setBackground(new Color( 129, 13, 175));
-
-
-
-
         //CRIAR OU DELETAR PLAYLIST
-        mainList = new JList<>(new String[0]);
-        mainList.setBackground(new Color(64, 64, 64));
-
-        JButton createPlaylistButton = new JButton("Criar playlist");
+        JButton createPlaylistButton = new JButton("Creat playlist");
         createPlaylistButton.setBounds(10, 370, 80, 20);// posição e tamanho
         add(createPlaylistButton);
 
-        createPlaylistButton.addActionListener(e -> {
-            String playlistName = JOptionPane.showInputDialog("Digite o nome da nova playlist:");
-            if (playlistName != null && !playlistName.isEmpty()) {
-                playlist = new Playlist(playlistName);
-                playlists.put(playlistName, playlist);
+        createPlaylistButton.addActionListener(e -> playlist = playlist_manager.creatPlaylist() );
 
-                // Atualiza a mainList com os nomes das playlists existentes
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-                // Adiciona a nova playlist ao cardLayout
-                playlists_panel.add(playlist.getPlaylist(), playlistName);
-            }
-        });
-
-        JButton delete_playlist_button = new JButton("Deletar playlist");
+        JButton delete_playlist_button = new JButton("Delete");
         delete_playlist_button.setBounds(100, 370, 80, 20);// posição e tamanho
         add(delete_playlist_button);
 
-        delete_playlist_button.addActionListener(e -> {
-                String playlist_name = mainList.getSelectedValue();
-                Playlist playlist = playlists.get(playlist_name);
+        delete_playlist_button.addActionListener(e -> playlist_manager.deletePlaylist() );
 
-            if (playlist != null) {
-                playlists_panel.remove(playlist.getPlaylist());
-                playlists.remove(playlist_name);
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
-            }
-        });
 
 
         //adicione um ouvinte para alternar entre playlists
-        mainList.addListSelectionListener(e -> {
-            String selectedPlaylist = mainList.getSelectedValue();
-            cardLayout.show(playlists_panel, selectedPlaylist);
-        });
+        playlist_manager.switchPlaylist();
 
-        // Adicione a lista principal e as playlists (card) ao JFrame
-        playlists_panel.setBounds(250, 50, 500, 300);//posição e tamanho
-        add(playlists_panel);
 
-        JLabel mainList_label = new JLabel("Playlists");
-        mainList_label.setBounds(0, 0, 500, 30);
-        mainList_label.setBackground(new Color(33, 41, 48));
-        mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
-        mainList_label.setVerticalAlignment(SwingConstants.CENTER);
-        mainList_label.setFont(new Font("Arial", Font.BOLD, 20));
-        mainList_label.setForeground(Color.WHITE);
 
-        Panel mainList_panel = new Panel(new BorderLayout());
-        mainList_panel.setBounds(10, 50, 200, 300);//posição e tamanho
-        mainList_panel.add(mainList_label, BorderLayout.NORTH);
-        mainList_panel.add(mainList, BorderLayout.CENTER);
-        add(mainList_panel);
+        //adicione a lista principal e as playlists (card) ao JFrame
+        playlist_manager.getPlaylistCard().setBounds(250, 50, 500, 300);//posição e tamanho do card de uma playlist
+        add(playlist_manager.getPlaylistCard());
+
+        playlist_manager.getPlaylistManagerPanel().setBounds(10, 50, 200, 300);//posição e tamanho do panel das playlists
+        add(playlist_manager.getPlaylistManagerPanel());
 
 
 
@@ -164,7 +117,7 @@ public class Apolo extends JFrame{
             }
         });
 
-        JButton delete_button = new JButton("del msc");
+        JButton delete_button = new JButton("Remove");
         delete_button.setBounds(675, 370, 80, 20);//posição e tamanho
         add(delete_button);
         delete_button.addActionListener(e -> {
@@ -176,9 +129,10 @@ public class Apolo extends JFrame{
 
 
         //TOCAR MUSICA
-        JButton play_button = new JButton("play");
+        JButton play_button = new JButton("Play");
         play_button.setBounds(250, 370, 80, 20);//posição e tamanho
         add(play_button);
+
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ( (musicThread == null || !musicThread.isAlive()) && (playlist != null)) {

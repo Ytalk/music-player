@@ -9,10 +9,7 @@ import javazoom.jl.player.advanced.PlaybackListener;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.io.InputStream;
-
 import java.io.File;
-import java.io.FileInputStream;
 
 
 public class Play implements Runnable{
@@ -40,7 +37,6 @@ public class Play implements Runnable{
 
             // AdvancedPlayer para reproduzir o arquivo MP3
             this.player = new AdvancedPlayer(inputStream);
-
 
         } catch (JavaLayerException | IOException e) {
             e.printStackTrace();
