@@ -4,10 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.Serializable;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 
-public class Playlist {
+public class Playlist implements Serializable {
 
     JScrollPane scrollPane;//painel para scrollar a lista de musicas
     DefaultListModel<String> listModel;//representa o modelo/gerenciador da playlist

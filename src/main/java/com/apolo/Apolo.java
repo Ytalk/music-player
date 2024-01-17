@@ -26,7 +26,7 @@ public class Apolo extends JFrame{
         mainList = playlist_manager.getMainList();
         playlists = playlist_manager.getMap();
 
-
+        playlist_manager.loadFile();
 
         //MENUBAR
         JMenuBar mb = new JMenuBar();
@@ -111,6 +111,7 @@ public class Apolo extends JFrame{
                     String filePath = selectedFile.getAbsolutePath();
 
                     String selectedPlaylist = mainList.getSelectedValue();
+                    playlist_manager.saveToFile(playlist_manager);/////////////////////////////
 
                     addMusic(selectedPlaylist, filePath);
                 }
