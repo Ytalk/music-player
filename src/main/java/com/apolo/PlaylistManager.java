@@ -19,17 +19,17 @@ import java.util.ArrayList;
 
 public class PlaylistManager implements Serializable{
 
+    private static final long serialVersionUID = 6L;
     private JList<String> mainList;//jlist com str para card
     private JPanel playlists_panel;//card
     private Panel mainList_panel;//panel playlist manager
     private CardLayout cardLayout;
     private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
     private PlaylistManager manager;
-    //private ArrayList<Playlist> playlists_list;
+
 
     public PlaylistManager() {
         playlists = new HashMap<>();
-        //playlists_list = new ArrayList<>();
 
         //CARD
         playlists_panel = new JPanel();
@@ -119,31 +119,35 @@ public class PlaylistManager implements Serializable{
 
         try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
             writer.writeObject(manager);//escreve no arquivo
-            JOptionPane.showMessageDialog(null, "Salvo com sucesso!", "Salvamento", JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e){
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving file: " + e.getMessage(), "Saving Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
 
-    public void loadFile(){//carrega dados para a lista rentals
+    public void loadFile(){
 
         try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OIS para ler objetos do arquivo
 
-            manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e adiciona à lista rentals
+            manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
 
-            //reader.registerValidation(this, 0);//registra o objeto para validação. intância atual "rentals", validação imediata (prioridade 0).
-            JOptionPane.showMessageDialog(null, "Playlist carregada com sucesso!", "Playlist Aberta", JOptionPane.INFORMATION_MESSAGE);
+            //reader.registerValidation(this, 0);//registra o objeto para validação. validação imediata (prioridade 0 / alta).
         }
 
         catch (FileNotFoundException e){
-            JOptionPane.showMessageDialog(null, "O arquivo serializado que contém a playlist não foi encontrado!", "Playlist Não Encontrada", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
         }
 
         catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Algo deu errado ao carregar a lista", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Something went wrong loading the playlists!", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+
+    public PlaylistManager getManager(){
+        return manager;
     }
 
 

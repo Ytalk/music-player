@@ -20,13 +20,28 @@ public class Apolo extends JFrame{
     private Playlist playlist;
 
 
+    public class test{
+
+        public PlaylistManager teste() {
+            PlaylistManager playlist_manager = new PlaylistManager();
+            playlist_manager.loadFile();
+            if (playlist_manager.getManager() != null) {
+                playlist_manager = playlist_manager.getManager();
+            }
+
+            return playlist_manager;
+        }
+
+    }
+
     public Apolo(){
 
-        PlaylistManager playlist_manager = new PlaylistManager();
+        PlaylistManager playlist_manager = new test().teste();
+
         mainList = playlist_manager.getMainList();
         playlists = playlist_manager.getMap();
 
-        playlist_manager.loadFile();
+
 
         //MENUBAR
         JMenuBar mb = new JMenuBar();
@@ -70,14 +85,20 @@ public class Apolo extends JFrame{
         createPlaylistButton.setBounds(10, 370, 80, 20);// posição e tamanho
         add(createPlaylistButton);
 
-        createPlaylistButton.addActionListener(e -> playlist = playlist_manager.creatPlaylist() );
+        createPlaylistButton.addActionListener(e -> {
+            playlist = playlist_manager.creatPlaylist();
+            playlist_manager.saveToFile(playlist_manager);
+        });
 
 
         JButton delete_playlist_button = new JButton("Delete");
         delete_playlist_button.setBounds(100, 370, 80, 20);// posição e tamanho
         add(delete_playlist_button);
 
-        delete_playlist_button.addActionListener(e -> playlist_manager.deletePlaylist() );
+        delete_playlist_button.addActionListener(e -> {
+            playlist_manager.deletePlaylist();
+            playlist_manager.saveToFile(playlist_manager);
+        });
 
 
 
@@ -111,9 +132,10 @@ public class Apolo extends JFrame{
                     String filePath = selectedFile.getAbsolutePath();
 
                     String selectedPlaylist = mainList.getSelectedValue();
-                    playlist_manager.saveToFile(playlist_manager);/////////////////////////////
 
                     addMusic(selectedPlaylist, filePath);
+
+                    playlist_manager.saveToFile(playlist_manager);
                 }
             }
         });
@@ -124,6 +146,7 @@ public class Apolo extends JFrame{
         delete_button.addActionListener(e -> {
             String selectedPlaylist = mainList.getSelectedValue();
             removeSelectedMusic(selectedPlaylist);
+            playlist_manager.saveToFile(playlist_manager);
         });
 
 
@@ -136,15 +159,21 @@ public class Apolo extends JFrame{
 
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if ( (musicThread == null || !musicThread.isAlive()) && (playlist != null)) {
-                    String filePath = playlist.getMp3List().getSelectedValue();
-                    System.out.println(filePath);
-                    Play music = new Play(filePath);
-                    musicThread = new Thread(music);
-                    musicThread.start();
+                String selectedPlaylistName = mainList.getSelectedValue();
+
+                if (selectedPlaylistName != null) {
+                    Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
+
+                    if (selectedPlaylist != null && (musicThread == null || !musicThread.isAlive())) {
+                        String filePath = selectedPlaylist.getMp3List().getSelectedValue();
+                        System.out.println(filePath);
+
+                        Play music = new Play(filePath);
+                        musicThread = new Thread(music);
+                        musicThread.start();
+                    }
                 }
             }
-
         });
 
 

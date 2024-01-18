@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 
 public class Playlist implements Serializable {
 
+    private static final long serialVersionUID = 6L;
     JScrollPane scrollPane;//painel para scrollar a lista de musicas
     DefaultListModel<String> listModel;//representa o modelo/gerenciador da playlist
     JList<String> mp3List;//representa a lista de musicas
@@ -57,7 +58,9 @@ public class Playlist implements Serializable {
     }
 
 
-    private class FileNameCellRenderer extends DefaultListCellRenderer {
+    private class FileNameCellRenderer extends DefaultListCellRenderer implements Serializable{
+        private static final long serialVersionUID = 6L;
+
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
