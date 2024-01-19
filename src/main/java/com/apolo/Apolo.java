@@ -1,13 +1,13 @@
 package com.apolo;
 
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.Dimension;
 
 import javax.swing.*;
-import java.awt.Color;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.Font;
+import java.net.URL;
 import java.util.Map;
 import java.io.File;
 
@@ -81,8 +81,14 @@ public class Apolo extends JFrame{
 
 
         //CRIAR OU DELETAR PLAYLIST
-        JButton createPlaylistButton = new JButton("Creat playlist");
-        createPlaylistButton.setBounds(10, 370, 80, 20);// posição e tamanho
+        URL imageUrl = getClass().getResource("/icons/plus_circled_icon.png");
+        ImageIcon icon = new ImageIcon(imageUrl);
+        Image new_image = icon.getImage().getScaledInstance(22, 22, Image.SCALE_SMOOTH);
+
+        JButton createPlaylistButton = new JButton(new ImageIcon(new_image));
+        createPlaylistButton.setBackground(new Color(33, 41, 48));
+        createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
+        createPlaylistButton.setBounds(170, 51, 22, 22);
         add(createPlaylistButton);
 
         createPlaylistButton.addActionListener(e -> {
