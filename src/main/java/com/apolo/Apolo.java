@@ -81,11 +81,7 @@ public class Apolo extends JFrame{
 
 
         //CRIAR OU DELETAR PLAYLIST
-        URL imageUrl = getClass().getResource("/icons/plus_circled_icon.png");
-        ImageIcon icon = new ImageIcon(imageUrl);
-        Image new_image = icon.getImage().getScaledInstance(22, 22, Image.SCALE_SMOOTH);
-
-        JButton createPlaylistButton = new JButton(new ImageIcon(new_image));
+        JButton createPlaylistButton = new JButton(  getIcon("/icons/plus_circled_icon.png", 22)  );
         createPlaylistButton.setBackground(new Color(33, 41, 48));
         createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         createPlaylistButton.setBounds(170, 51, 22, 22);
@@ -159,8 +155,10 @@ public class Apolo extends JFrame{
 
 
         //TOCAR MUSICA
-        JButton play_button = new JButton("Play");
-        play_button.setBounds(250, 370, 80, 20);//posição e tamanho
+        JButton play_button = new JButton(  getIcon("/icons/circle_play_icon.png", 48)  );
+        play_button.setBounds(360, 360, 48, 48);
+        play_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        play_button.setContentAreaFilled(false);
         add(play_button);
 
         play_button.addActionListener(new ActionListener() {
@@ -236,6 +234,15 @@ public class Apolo extends JFrame{
         if (playlist != null) {
             playlist.removeSelectedMusic();
         }
+    }
+
+
+    public ImageIcon getIcon(String pathIcon, int size){
+        URL imageUrl = getClass().getResource(pathIcon);
+        ImageIcon icon = new ImageIcon(imageUrl);
+        Image new_image = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
+
+        return new ImageIcon(new_image);
     }
 
 
