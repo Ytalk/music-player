@@ -14,11 +14,11 @@ import java.io.File;
 
 public class Apolo extends JFrame{
 
-    Thread musicThread;
+    Thread musicThread = new Thread();
     private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
     private JList<String> mainList;
     private Playlist playlist;
-
+    Play music;
 
     public class test{
 
@@ -153,13 +153,31 @@ public class Apolo extends JFrame{
 
 
 
-
         //TOCAR MUSICA
         JButton play_button = new JButton(  getIcon("/icons/circle_play_icon.png", 48)  );
         play_button.setBounds(360, 360, 48, 48);
-        play_button.setBorder(new EmptyBorder(0, 0, 0, 0));
-        play_button.setContentAreaFilled(false);
+        //play_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        //play_button.setContentAreaFilled(false);
         add(play_button);
+
+        play_button.setBorder( BorderFactory.createEmptyBorder() );
+        play_button.addMouseListener( new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e){
+                play_button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent e){
+                play_button.setBorder(BorderFactory.createEmptyBorder());
+            }
+
+            /*public void mousePressed(java.awt.event.MouseEvent e){
+
+            }*/
+
+            public void mouseRealesed(java.awt.event.MouseEvent e){
+                play_button.setBackground(UIManager.getColor("control"));
+            }
+        });
 
         play_button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -168,11 +186,11 @@ public class Apolo extends JFrame{
                 if (selectedPlaylistName != null) {
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
-                    if (selectedPlaylist != null && (musicThread == null || !musicThread.isAlive())) {
+                    if ( selectedPlaylist != null && !musicThread.isAlive() ) {
                         String filePath = selectedPlaylist.getMp3List().getSelectedValue();
                         System.out.println(filePath);
 
-                        Play music = new Play(filePath);
+                        music = new Play(filePath);
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
@@ -204,6 +222,82 @@ public class Apolo extends JFrame{
 
         });*/
 
+
+
+        JButton previous_button = new JButton(  getIcon("/icons/48_music_next_player_icon.png", 48)  );
+        previous_button.setBounds(300, 360, 48, 48);
+        previous_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        previous_button.setContentAreaFilled(false);
+        add(previous_button);
+
+        previous_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                music.stop();
+                String selectedPlaylistName = mainList.getSelectedValue();
+
+                if (selectedPlaylistName != null) {
+                    Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
+
+                    if ( selectedPlaylist != null && !musicThread.isAlive() ) {
+                        int previousIndex = selectedPlaylist.getMp3List().getSelectedIndex() - 1;
+
+                        if (previousIndex >= 0) {
+                            //obtém o arquivo da música anterior
+                            String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);
+                            System.out.println(filePath);
+
+                            //muda a seleção na JList para a música anterior
+                            selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);
+
+                            music = new Play(filePath);
+                            musicThread = new Thread(music);
+                            musicThread.start();
+                        }
+                        else {
+                            System.out.println("Você já está na primeira música.");
+                        }
+                    }
+                }
+            }
+        });
+
+
+        JButton next_button = new JButton(  getIcon("/icons/o48_music_next_player_icon.png", 48)  );
+        next_button.setBounds(420, 360, 48, 48);
+        next_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        next_button.setContentAreaFilled(false);
+        add(next_button);
+
+        next_button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                music.stop();
+                String selectedPlaylistName = mainList.getSelectedValue();
+
+                if (selectedPlaylistName != null) {
+                    Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
+
+                    if ( selectedPlaylist != null && !musicThread.isAlive() ) {
+                        int nextIndex = selectedPlaylist.getMp3List().getSelectedIndex() + 1;
+
+                        if ( nextIndex < selectedPlaylist.getMp3List().getModel().getSize() ) {
+                            // Obtém o próximo arquivo de música
+                            String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);
+                            System.out.println(filePath);
+
+                            // Muda a seleção na JList para a próxima música
+                            selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);
+
+                            music = new Play(filePath);
+                            musicThread = new Thread(music);
+                            musicThread.start();
+                        } 
+                        else{
+                            System.out.println("Não há mais músicas na lista.");
+                        }
+                    }
+                }
+            }
+        });
 
 
 

@@ -19,6 +19,7 @@ public class Play implements Runnable{
     private URL url;
     private Bitstream bitstream;
     private int pausedOnFrame = 0;
+    private volatile boolean stopped = false;
 
     public Play(String filePath) {
         try {
@@ -82,12 +83,21 @@ public class Play implements Runnable{
     }
 
 
-    public void pausePlayback() {
+    public void stop() {
+        stopped = true;
+        if (player != null) {
+            player.close();
+            System.out.println("Reprodução encerrada!");
+        }
+    }
+
+
+    /*public void pausePlayback() {
         if (player != null) {
             player.close();
             System.out.println("Reprodução pausada");
         }
-    }
+    }*/
 
 
     public void resumePlayback( int currentFrame ) {
