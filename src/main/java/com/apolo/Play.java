@@ -11,17 +11,26 @@ import java.io.IOException;
 import java.net.URL;
 import java.io.File;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 
 public class Play implements Runnable{
+
+    private boolean playing = false;
+    private ChangeListener changeListener;
+
 
     private AdvancedPlayer player;
     private FileInputStream fileInputStream;
     private URL url;
     private Bitstream bitstream;
-    private int pausedOnFrame = 0;
     private volatile boolean stopped = false;
 
-    public Play(String filePath) {
+
+    //NO CONSTRUCTOR
+
+    public void setMusic(String filePath) {
         try {
             // Cria um objeto File com o caminho fornecido
             File file = new File(filePath);
@@ -45,6 +54,21 @@ public class Play implements Runnable{
     }
 
 
+    public void addChangeListener(ChangeListener listener) {//primeiro aqui
+        changeListener = listener;
+    }
+
+    private void fireStateChanged() {//depois aqui
+        if (changeListener != null) {
+            changeListener.stateChanged(new ChangeEvent(this));
+        }
+    }
+
+
+    public boolean isPlaying(){
+        return playing;
+    }
+
 
     @Override
     public void run() {
@@ -55,23 +79,21 @@ public class Play implements Runnable{
     public void play() {
 
         try {
-            // Progresso da reprodução
+            playing = true; // Marca como reproduzindo
+            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
+
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Reprodução concluída!");
                     player.close();
+
+                    playing = false;
+                    fireStateChanged();
                 }
             });
 
             System.out.println("Reprodução iniciada!");
-
-            player.setPlayBackListener(new PlaybackListener() {
-                @Override
-                public void playbackFinished(PlaybackEvent event) {
-                    pausedOnFrame = event.getFrame();
-                }
-            });
 
             player.play();
 
@@ -88,6 +110,9 @@ public class Play implements Runnable{
         if (player != null) {
             player.close();
             System.out.println("Reprodução encerrada!");
+
+            playing = false;
+            fireStateChanged();
         }
     }
 
@@ -100,7 +125,7 @@ public class Play implements Runnable{
     }*/
 
 
-    public void resumePlayback( int currentFrame ) {
+    /*public void resumePlayback( int currentFrame ) {
         try {
             // Cria um novo FileInputStream a partir da URL
             fileInputStream = new FileInputStream(url.getFile());
@@ -124,7 +149,7 @@ public class Play implements Runnable{
         } catch (JavaLayerException | IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 
 }
