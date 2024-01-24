@@ -47,43 +47,6 @@ public class Apolo extends JFrame{
 
 
 
-        //MENUBAR
-        JMenuBar mb = new JMenuBar();
-        mb.setBackground(new Color (33, 41, 48));
-        setJMenuBar(mb);
-        mb.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-
-        //menu para adicionar path mp3 à JList
-        JMenu file_menu = new JMenu("File");
-        file_menu.setForeground(Color.WHITE);
-        file_menu.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        JMenuItem open = new JMenuItem("Open");
-        open.setForeground(Color.WHITE);
-        open.setFont(new Font("Arial", Font.PLAIN, 14));
-        open.setBackground(new Color(33, 41, 48));//cor do item suspenso
-        file_menu.add(open);
-
-        //cor da letra file quando fica em cima
-        file_menu.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                file_menu.setForeground(new Color(129, 13, 175));
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                file_menu.setForeground(Color.WHITE);
-            }
-        });
-
-        //configurar a largura
-        Dimension menuSize = new Dimension(50, 25);
-        file_menu.setPreferredSize(menuSize);
-        open.setPreferredSize(menuSize);
-
-        mb.add(file_menu);
-
-
-
         //CRIAR OU DELETAR PLAYLIST
         JButton createPlaylistButton = new JButton(  getIcon("/icons/392_4-more-white.png", 17)  );
         createPlaylistButton.setBackground(new Color(33, 41, 48));
@@ -108,22 +71,14 @@ public class Apolo extends JFrame{
 
 
 
-        //adicione um ouvinte para alternar entre playlists
-        playlist_manager.switchPlaylist();
-
-
-
-        //adicione a lista principal e as playlists (card) ao JFrame
-        playlist_manager.getPlaylistCard().setBounds(250, 50, 500, 300);//posição e tamanho do card de uma playlist
-        add(playlist_manager.getPlaylistCard());
-
-        playlist_manager.getPlaylistManagerPanel().setBounds(10, 50, 200, 300);//posição e tamanho do panel das playlists
-        add(playlist_manager.getPlaylistManagerPanel());
-
-
-
         //abrir ou deletar musica
-        open.addActionListener(new ActionListener() {
+        JButton addMusicButton = new JButton(  getIcon("/icons/392_4-more-white.png", 17)  );//aclopar na playlist
+        addMusicButton.setBackground(new Color(33, 41, 48));
+        addMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
+        addMusicButton.setBounds(700, 51, 22, 22);
+        add(addMusicButton);
+
+        addMusicButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
@@ -146,9 +101,11 @@ public class Apolo extends JFrame{
             }
         });
 
+
         JButton delete_button = new JButton("Remove");
         delete_button.setBounds(675, 370, 80, 20);//posição e tamanho
         add(delete_button);
+
         delete_button.addActionListener(e -> {
             String selectedPlaylist = mainList.getSelectedValue();
             removeSelectedMusic(selectedPlaylist);
@@ -157,33 +114,53 @@ public class Apolo extends JFrame{
 
 
 
+        //adicione um ouvinte para alternar entre playlists
+        playlist_manager.switchPlaylist();
+
+
+
+        //adicione a lista principal e as playlists (card) ao JFrame
+        playlist_manager.getPlaylistCard().setBounds(250, 50, 500, 300);//posição e tamanho do card de uma playlist
+        add(playlist_manager.getPlaylistCard());
+
+        playlist_manager.getPlaylistManagerPanel().setBounds(10, 50, 200, 300);//posição e tamanho do panel das playlists
+        add(playlist_manager.getPlaylistManagerPanel());
+
+
+
         //TOCAR MUSICA
         JButton play_button = new JButton(  getIcon("/icons/48_circle_play_icon.png", 48)  );
-        play_button.setBounds(360, 360, 48, 48);
-        //play_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        play_button.setBounds(360, 360, 58, 58);
+        play_button.setBorder( BorderFactory.createEmptyBorder() );
         play_button.setContentAreaFilled(false);
+        play_button.setFocusPainted(false);
         add(play_button);
 
-        play_button.setBorder( BorderFactory.createEmptyBorder() );
+        music.addChangeListener(evt -> {
+            if(music.isPlaying()){
+                play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48) );
+            }
+            else{
+                play_button.setIcon(getIcon("/icons/48_circle_play_icon.png", 48));
+            }
+        });
 
-        /*play_button.addMouseListener( new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e){
-                play_button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+        play_button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                updateIcon(53);
             }
 
-            public void mouseExited(java.awt.event.MouseEvent e){
-                play_button.setBorder(BorderFactory.createEmptyBorder());
+            @Override
+            public void mouseExited(MouseEvent e) {
+                updateIcon(48);
             }
 
-            public void mousePressed(java.awt.event.MouseEvent e){
-                //play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48) );
+            private void updateIcon(int size) {
+                String iconName = music.isPlaying() ? "/icons/48_circle_pause_icon.png" : "/icons/48_circle_play_icon.png";
+                play_button.setIcon(getIcon(iconName, size));
             }
-
-            public void mouseReleased(java.awt.event.MouseEvent e){
-                //play_button.setBackground(UIManager.getColor("control"));
-                play_button.setBorder(BorderFactory.createEmptyBorder());
-            }
-        });*/
+        });
 
         play_button.addMouseListener(new MouseAdapter() {
             @Override
@@ -212,40 +189,6 @@ public class Apolo extends JFrame{
 
             }
         });
-
-
-        music.addChangeListener(evt -> {
-            if(music.isPlaying()){
-                play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48) );
-            }
-            else{
-                play_button.setIcon(getIcon("/icons/48_circle_play_icon.png", 48));
-            }
-        });
-
-
-        /*JButton pause_button = new JButton("parar musica");
-        pause_button.setBounds(400, 200, 100, 30);//posição e tamanho
-        add(pause_button);
-
-        pause_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                music.pausePlayback();
-            }
-
-        });
-
-
-        JButton resume_button = new JButton("prosseguir musica");
-        resume_button.setBounds(285, 100, 100, 30);//posição e tamanho
-        add(resume_button);
-
-        resume_button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                music.resumePlayback(1000);
-            }
-
-        });*/
 
 
 
@@ -361,7 +304,7 @@ public class Apolo extends JFrame{
         ImageIcon icon = new ImageIcon(imageUrl);
         Image new_image = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
 
-        return new ImageIcon(new_image);
+        return new ImageIcon( new_image );
     }
 
 

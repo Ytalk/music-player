@@ -79,9 +79,6 @@ public class Play implements Runnable{
     public void play() {
 
         try {
-            playing = true; // Marca como reproduzindo
-            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
-
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
@@ -95,8 +92,10 @@ public class Play implements Runnable{
 
             System.out.println("Reprodução iniciada!");
 
-            player.play();
+            playing = true; // Marca como reproduzindo
+            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
 
+            player.play();
         }
         catch (JavaLayerException e) {
             e.printStackTrace();
