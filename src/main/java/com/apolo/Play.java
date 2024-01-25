@@ -19,13 +19,8 @@ public class Play implements Runnable{
 
     private boolean playing = false;
     private ChangeListener changeListener;
-
-
     private AdvancedPlayer player;
-    private FileInputStream fileInputStream;
-    private URL url;
-    private Bitstream bitstream;
-    private volatile boolean stopped = false;
+
 
 
     //NO CONSTRUCTOR
@@ -79,9 +74,6 @@ public class Play implements Runnable{
     public void play() {
 
         try {
-            playing = true; // Marca como reproduzindo
-            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
-
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
@@ -95,8 +87,10 @@ public class Play implements Runnable{
 
             System.out.println("Reprodução iniciada!");
 
-            player.play();
+            playing = true; // Marca como reproduzindo
+            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
 
+            player.play();
         }
         catch (JavaLayerException e) {
             e.printStackTrace();
@@ -106,8 +100,7 @@ public class Play implements Runnable{
 
 
     public void stop() {
-        stopped = true;
-        if (player != null) {
+        if (playing) {
             player.close();
             System.out.println("Reprodução encerrada!");
 

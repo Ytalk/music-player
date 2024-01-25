@@ -58,7 +58,8 @@ public class PlaylistManager implements Serializable{
 
     public Playlist creatPlaylist(){
         String playlistName = JOptionPane.showInputDialog("Enter the name of the new playlist:");
-        if (playlistName != null && !playlistName.isEmpty()) {
+
+        if (playlistName != null && !playlistName.isEmpty() && ( playlistName.length() <= 20 ) ) {
             Playlist playlist = new Playlist(playlistName);
             playlists.put(playlistName, playlist);
 
