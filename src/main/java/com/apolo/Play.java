@@ -25,25 +25,26 @@ public class Play implements Runnable{
 
     //NO CONSTRUCTOR
 
-    public void setMusic(String filePath) {
-        try {
-            // Cria um objeto File com o caminho fornecido
-            File file = new File(filePath);
+    public void setMusic(String filePath) throws musicException{
+        if (filePath == null) {
+            throw new musicException("selecione uma musica primeiro", "Path nulo");
+        }
 
-            // Obtém o caminho absoluto
-            String absolutePath = file.getAbsolutePath();
+        // Cria um objeto File com o caminho fornecido
+        File file = new File(filePath);
 
+        if (!file.exists()) {
+            throw new musicException("Música não encontrada: " + filePath, "Path não existe");
+        }
+
+        try{
             // Cria um FileInputStream a partir do caminho absoluto
-            FileInputStream inputStream = new FileInputStream(absolutePath);
-
-            if (inputStream == null) {
-                throw new IOException("Arquivo não encontrado: " + filePath);
-            }
+            FileInputStream inputStream = new FileInputStream(file);
 
             // AdvancedPlayer para reproduzir o arquivo MP3
             this.player = new AdvancedPlayer(inputStream);
-
-        } catch (JavaLayerException | IOException e) {
+        }
+        catch (JavaLayerException | IOException e) {
             e.printStackTrace();
         }
     }

@@ -177,9 +177,15 @@ public class Apolo extends JFrame{
                             String filePath = selectedPlaylist.getMp3List().getSelectedValue();
                             System.out.println(filePath);
 
-                            music.setMusic(filePath);
-                            musicThread = new Thread(music);
-                            musicThread.start();
+                            try {
+                                music.setMusic(filePath);
+                                musicThread = new Thread(music);
+                                musicThread.start();
+                            }
+                            catch(musicException ex){
+                                ex.showMessage();
+                            }
+
                         }
                     }
 
@@ -244,9 +250,15 @@ public class Apolo extends JFrame{
                             System.out.println("Você já está na primeira música.");
                             String filePath = selectedPlaylist.getMp3List().getSelectedValue();
 
-                            music.setMusic(filePath);
-                            musicThread = new Thread(music);
-                            musicThread.start();
+                            try {
+                                music.setMusic(filePath);
+                                musicThread = new Thread(music);
+                                musicThread.start();
+                            }
+                            catch(musicException ex){
+                                ex.showMessage();
+                            }
+
                         }
                     }
                 }
@@ -308,9 +320,15 @@ public class Apolo extends JFrame{
                             System.out.println("Não há mais músicas na lista.");
                             String filePath = selectedPlaylist.getMp3List().getSelectedValue();
 
-                            music.setMusic(filePath);
-                            musicThread = new Thread(music);
-                            musicThread.start();
+                            try {
+                                music.setMusic(filePath);
+                                musicThread = new Thread(music);
+                                musicThread.start();
+                            }
+                            catch(musicException ex){
+                                ex.showMessage();
+                            }
+
                         }
                     }
                 }
