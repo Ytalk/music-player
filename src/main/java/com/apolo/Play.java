@@ -20,6 +20,7 @@ public class Play implements Runnable{
     private boolean playing = false;
     private ChangeListener changeListener;
     private AdvancedPlayer player;
+    private int pausedOnFrame = 0;
 
 
 
@@ -27,14 +28,14 @@ public class Play implements Runnable{
 
     public void setMusic(String filePath) throws musicException{
         if (filePath == null) {
-            throw new musicException("selecione uma musica primeiro", "Path nulo");
+            throw new musicException("select a song first", "null path");
         }
 
         // Cria um objeto File com o caminho fornecido
         File file = new File(filePath);
 
         if (!file.exists()) {
-            throw new musicException("Música não encontrada: " + filePath, "Path não existe");
+            throw new musicException("Song not found: " + filePath, "Path does not exist");
         }
 
         try{
@@ -109,41 +110,6 @@ public class Play implements Runnable{
             fireStateChanged();
         }
     }
-
-
-    /*public void pausePlayback() {
-        if (player != null) {
-            player.close();
-            System.out.println("Reprodução pausada");
-        }
-    }*/
-
-
-    /*public void resumePlayback( int currentFrame ) {
-        try {
-            // Cria um novo FileInputStream a partir da URL
-            fileInputStream = new FileInputStream(url.getFile());
-
-            // Cria um novo AdvancedPlayer
-            player = new AdvancedPlayer(fileInputStream);
-
-            // Configura o listener para acompanhar o progresso da reprodução
-            player.setPlayBackListener(new PlaybackListener() {
-                @Override
-                public void playbackFinished(PlaybackEvent evt) {
-                    System.out.println("Reprodução concluída");
-                }
-            });
-
-            // Move para a posição pausada e inicia a reprodução
-            player.play( pausedOnFrame, Integer.MAX_VALUE);
-
-            System.out.println("Reprodução retomada");
-
-        } catch (JavaLayerException | IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 
 
 }

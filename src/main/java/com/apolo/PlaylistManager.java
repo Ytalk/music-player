@@ -83,7 +83,7 @@ public class PlaylistManager implements Serializable{
     }
 
 
-    public void deletePlaylist(){
+    public void deletePlaylist() throws musicException{
         String playlist_name = mainList.getSelectedValue();
         Playlist playlist = playlists.get(playlist_name);
 
@@ -91,6 +91,9 @@ public class PlaylistManager implements Serializable{
             playlists_panel.remove(playlist.getPlaylist());
             playlists.remove(playlist_name);
             mainList.setListData(playlists.keySet().toArray(new String[0]));
+        }
+        else{
+            throw new musicException("Select a playlist before deleting!", "no playlist selected");
         }
     }
 
