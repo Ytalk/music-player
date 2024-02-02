@@ -8,7 +8,6 @@ import javazoom.jl.player.advanced.PlaybackListener;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.io.File;
 
 import javax.swing.event.ChangeEvent;
@@ -20,8 +19,8 @@ public class Play implements Runnable{
     private boolean playing = false;
     private ChangeListener changeListener;
     private AdvancedPlayer player;
-    private int pausedOnFrame = 0;
-
+    private int pausedOnFrame = 1500;
+    File file;
 
 
     //NO CONSTRUCTOR
@@ -31,18 +30,15 @@ public class Play implements Runnable{
             throw new musicException("select a song first", "null path");
         }
 
-        // Cria um objeto File com o caminho fornecido
-        File file = new File(filePath);
+        file = new File(filePath);
 
         if (!file.exists()) {
             throw new musicException("Song not found: " + filePath, "Path does not exist");
         }
 
         try{
-            // Cria um FileInputStream a partir do caminho absoluto
             FileInputStream inputStream = new FileInputStream(file);
 
-            // AdvancedPlayer para reproduzir o arquivo MP3
             this.player = new AdvancedPlayer(inputStream);
         }
         catch (JavaLayerException | IOException e) {
@@ -110,6 +106,27 @@ public class Play implements Runnable{
             fireStateChanged();
         }
     }
+
+
+    /*public void resumePlayback() {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            player = new AdvancedPlayer(fileInputStream);
+
+            //listener para acompanhar o progresso da reprodução
+            player.setPlayBackListener(new PlaybackListener() {
+                @Override
+                public void playbackFinished(PlaybackEvent evt) {
+                    System.out.println("Reprodução concluída");
+                }
+            });
+            //inicia a reprodução posição pausada
+            player.play( pausedOnFrame, Integer.MAX_VALUE);
+            System.out.println("Reprodução retomada");
+        } catch (JavaLayerException | IOException e) {
+            e.printStackTrace();
+        }
+    }*/
 
 
 }
