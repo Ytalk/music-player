@@ -88,9 +88,12 @@ public class PlaylistManager implements Serializable{
         Playlist playlist = playlists.get(playlist_name);
 
         if (playlist != null) {
-            playlists_panel.remove(playlist.getPlaylist());
-            playlists.remove(playlist_name);
-            mainList.setListData(playlists.keySet().toArray(new String[0]));
+            int confirm_playlist_del = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + playlist_name + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
+            if (confirm_playlist_del == JOptionPane.YES_OPTION) {
+                playlists_panel.remove(playlist.getPlaylist());
+                playlists.remove(playlist_name);
+                mainList.setListData(playlists.keySet().toArray(new String[0]));
+            }
         }
         else{
             throw new musicException("Select a playlist before deleting!", "no playlist selected");
