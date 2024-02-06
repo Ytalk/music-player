@@ -101,14 +101,6 @@ public class PlaylistManager implements Serializable{
     }
 
 
-    public void switchPlaylist(){
-        mainList.addListSelectionListener(e -> {
-            String selectedPlaylist = mainList.getSelectedValue();
-            cardLayout.show(playlists_panel, selectedPlaylist);
-        });
-    }
-
-
     public JList getMainList(){
         return mainList;
     }
@@ -126,6 +118,11 @@ public class PlaylistManager implements Serializable{
 
     public Map<String, Playlist> getMap(){
         return playlists;
+    }
+
+
+    public CardLayout getCardLayout(){
+        return cardLayout;
     }
 
 

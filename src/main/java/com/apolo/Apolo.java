@@ -20,8 +20,12 @@ public class Apolo extends JFrame{
     private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
     private JList<String> mainList;
     private Playlist playlist;
+    private CardLayout cardLayout;
     private Play music = new Play();
     private boolean pause = true;
+
+    private ImageIcon addMusicIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
+    private ImageIcon deleteIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
 
     public class importUserPlaylists{
 
@@ -43,14 +47,15 @@ public class Apolo extends JFrame{
 
         mainList = playlist_manager.getMainList();
         playlists = playlist_manager.getMap();
+        cardLayout = playlist_manager.getCardLayout();
 
 
 
         //CRIAR OU DELETAR PLAYLIST
-        JButton createPlaylistButton = new JButton(  getIcon("/icons/392_4-more-white.png", 17, 17)  );
+        JButton createPlaylistButton = new JButton(addMusicIcon);
         createPlaylistButton.setBackground(new Color(33, 41, 48));
         createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
-        createPlaylistButton.setBounds(170, 51, 22, 22);
+        createPlaylistButton.setBounds(170, 52, 20, 20);
         createPlaylistButton.setFocusPainted(false);
         add(createPlaylistButton);
 
@@ -60,8 +65,8 @@ public class Apolo extends JFrame{
         });
 
 
-        JButton delete_playlist_button = new JButton( getIcon("/icons/rectangle-632-180.png", 15, 7) );
-        delete_playlist_button.setBounds(30, 56, 20, 10);// posição e tamanho
+        JButton delete_playlist_button = new JButton(deleteIcon);
+        delete_playlist_button.setBounds(30, 57, 20, 10);// posição e tamanho
         delete_playlist_button.setBackground(new Color(33, 41, 48));
         delete_playlist_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         delete_playlist_button.setFocusPainted(false);
@@ -80,10 +85,10 @@ public class Apolo extends JFrame{
 
 
         //abrir ou deletar musica
-        JButton addMusicButton = new JButton(  getIcon("/icons/392_4-more-white.png", 17, 17)  );//aclopar na playlist
+        JButton addMusicButton = new JButton(addMusicIcon);//aclopar na playlist
         addMusicButton.setBackground(new Color(33, 41, 48));
         addMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
-        addMusicButton.setBounds(700, 51, 22, 22);
+        addMusicButton.setBounds(700, 52, 20, 20);
         addMusicButton.setFocusPainted(false);
         add(addMusicButton);
 
@@ -109,7 +114,8 @@ public class Apolo extends JFrame{
                             File selectedFile = fileChooser.getSelectedFile();
                             String filePath = selectedFile.getAbsolutePath();
 
-                            addMusic(selectedPlaylist, filePath);
+                            playlist = playlists.get(selectedPlaylist);
+                            playlist.addMusic(filePath);
                             playlist_manager.saveToFile(playlist_manager);
                         }
                     }
@@ -123,8 +129,8 @@ public class Apolo extends JFrame{
 
 
 
-        JButton delete_button = new JButton( getIcon("/icons/rectangle-632-180.png", 15, 7) );
-        delete_button.setBounds(270, 56, 20, 10);// posição e tamanho
+        JButton delete_button = new JButton(deleteIcon);
+        delete_button.setBounds(270, 57, 20, 10);// posição e tamanho
         delete_button.setBackground(new Color(33, 41, 48));
         delete_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         delete_button.setFocusPainted(false);
@@ -140,7 +146,8 @@ public class Apolo extends JFrame{
 
                 int confirm_playlist_del = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
                 if (confirm_playlist_del == JOptionPane.YES_OPTION) {
-                    removeSelectedMusic(selectedPlaylist);
+                    playlist = playlists.get(selectedPlaylist);
+                    playlist.removeSelectedMusic();
                     playlist_manager.saveToFile(playlist_manager);
                 }
             }
@@ -152,7 +159,12 @@ public class Apolo extends JFrame{
 
 
         //adicione um ouvinte para alternar entre playlists
-        playlist_manager.switchPlaylist();
+        mainList.addListSelectionListener(e -> {
+            String selectedPlaylist = mainList.getSelectedValue();
+            cardLayout.show(playlist_manager.getPlaylistCard(), selectedPlaylist);
+            addMusicButton.repaint();
+            delete_button.repaint();
+        });
 
 
 
@@ -405,24 +417,6 @@ public class Apolo extends JFrame{
         pack();//empacota/organiza
         setLocationRelativeTo(null);//centraliza
         setVisible(true);
-    }
-
-
-    public void addMusic(String playlistName, String path) {
-        Playlist playlist = playlists.get(playlistName);
-
-        if (playlist != null) {
-            playlist.addMusic(path);
-        }
-    }
-
-
-    public void removeSelectedMusic(String playlistName) {
-        Playlist playlist = playlists.get(playlistName);
-
-        if (playlist != null) {
-            playlist.removeSelectedMusic();
-        }
     }
 
 

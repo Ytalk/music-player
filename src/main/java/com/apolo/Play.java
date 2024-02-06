@@ -75,7 +75,7 @@ public class Play implements Runnable{
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
-                    System.out.println("Reprodução concluída!");
+                    System.out.println("Playback complete!");
                     player.close();
 
                     playing = false;
@@ -83,7 +83,7 @@ public class Play implements Runnable{
                 }
             });
 
-            System.out.println("Reprodução iniciada!");
+            System.out.println("Playback started!");
 
             playing = true; // Marca como reproduzindo
             fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
@@ -100,7 +100,7 @@ public class Play implements Runnable{
     public void stop() {
         if (playing) {
             player.close();
-            System.out.println("Reprodução encerrada!");
+            System.out.println("Playback is over!");
 
             playing = false;
             fireStateChanged();
