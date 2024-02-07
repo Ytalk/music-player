@@ -24,6 +24,10 @@ public class Apolo extends JFrame{
     private Play music = new Play();
     private boolean pause = true;
 
+    private enum RepeatState { INACTIVE, REPEAT, REPEAT_ONCE }
+    private RepeatState currentState = RepeatState.INACTIVE;
+    private JButton repeat_button;
+
     private ImageIcon addMusicIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
     private ImageIcon deleteIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
 
@@ -368,6 +372,19 @@ public class Apolo extends JFrame{
 
 
 
+        repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 28, 28) );
+        repeat_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        repeat_button.setFocusPainted(false);
+        repeat_button.setContentAreaFilled(false);
+        add(repeat_button);
+
+        repeat_button.addActionListener(e -> {
+            toggleRepeatState();
+            updateButtonIcon();
+        });
+
+
+
         music.addChangeListener(evt -> {//play, pause and next
             if(music.isPlaying()){
                 play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48, 48) );
@@ -380,8 +397,11 @@ public class Apolo extends JFrame{
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
                     if(selectedPlaylist != null){
-                        if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() )
+                        if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && currentState == RepeatState.INACTIVE )
                             next_button.doClick();
+
+                        if( currentState == RepeatState.REPEAT )
+                            play_button.doClick();
                     }
                 }
 
@@ -396,7 +416,8 @@ public class Apolo extends JFrame{
         control_panel.add(previous_button);
         control_panel.add(play_button);
         control_panel.add(next_button);
-        control_panel.setBounds(300, 360, 200, 90);
+        control_panel.add(repeat_button);
+        control_panel.setBounds(300, 360, 250, 90);
         add(control_panel);
 
 
@@ -426,6 +447,40 @@ public class Apolo extends JFrame{
         Image new_image = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
         return new ImageIcon( new_image );
+    }
+
+
+    private void toggleRepeatState() {
+        switch (currentState) {
+            case INACTIVE:
+                currentState = RepeatState.REPEAT;
+                break;
+            case REPEAT:
+                currentState = RepeatState.REPEAT_ONCE;
+                break;
+            case REPEAT_ONCE:
+                currentState = RepeatState.INACTIVE;
+                break;
+        }
+    }
+
+    private void updateButtonIcon() {
+        ImageIcon icon;
+        switch (currentState) {
+            case INACTIVE:
+                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                break;
+            case REPEAT:
+                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                break;
+            case REPEAT_ONCE:
+                icon = getIcon("/icons/repeat-song-once-512.png", 28, 28);
+                break;
+            default:
+                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                break;
+        }
+        repeat_button.setIcon(icon);
     }
 
 

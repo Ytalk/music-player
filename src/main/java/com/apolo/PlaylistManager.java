@@ -60,7 +60,7 @@ public class PlaylistManager implements Serializable{
 
         String playlistName = "";
         while( playlistName.length() < 1 || playlistName.length() > 20 ) {
-            playlistName = JOptionPane.showInputDialog("Enter the name of the new playlist (1 to 20 characters):");
+            playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
 
             if (playlistName == null) {
                 break;
@@ -71,10 +71,10 @@ public class PlaylistManager implements Serializable{
             Playlist playlist = new Playlist(playlistName);
             playlists.put(playlistName, playlist);
 
-            // Atualiza a mainList com os nomes das playlists existentes
+            //atualiza a mainList com os nomes das playlists existentes
             mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-            // Adiciona a nova playlist ao cardLayout
+            //adiciona a nova playlist ao cardLayout
             playlists_panel.add(playlist.getPlaylist(), playlistName);
 
             return playlist;
