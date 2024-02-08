@@ -25,8 +25,9 @@ public class Apolo extends JFrame{
     private boolean pause = true;
 
     private enum RepeatState { INACTIVE, REPEAT, REPEAT_ONCE }
-    private RepeatState currentState = RepeatState.INACTIVE;
+    private RepeatState current_repeat_state = RepeatState.INACTIVE;
     private JButton repeat_button;
+    private int counter_repeat_once = 0;
 
     private ImageIcon addMusicIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
     private ImageIcon deleteIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
@@ -385,7 +386,7 @@ public class Apolo extends JFrame{
 
 
 
-        music.addChangeListener(evt -> {//play, pause and next
+        music.addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
             if(music.isPlaying()){
                 play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48, 48) );
             }
@@ -397,11 +398,25 @@ public class Apolo extends JFrame{
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
                     if(selectedPlaylist != null){
-                        if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && currentState == RepeatState.INACTIVE )
+                        if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && current_repeat_state == RepeatState.INACTIVE )
                             next_button.doClick();
 
-                        if( currentState == RepeatState.REPEAT )
+                        else if( current_repeat_state == RepeatState.REPEAT )
                             play_button.doClick();
+
+                        else if( current_repeat_state == RepeatState.REPEAT_ONCE ){
+                            if(counter_repeat_once < 1){
+                                play_button.doClick();
+                                ++counter_repeat_once;
+                            }
+                            else{
+                                if ( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() ) {
+                                    next_button.doClick();
+                                }
+                                counter_repeat_once = 0;
+                            }
+                        }
+
                     }
                 }
 
@@ -451,31 +466,36 @@ public class Apolo extends JFrame{
 
 
     private void toggleRepeatState() {
-        switch (currentState) {
+        switch (current_repeat_state) {
             case INACTIVE:
-                currentState = RepeatState.REPEAT;
+                current_repeat_state = RepeatState.REPEAT;
                 break;
+
             case REPEAT:
-                currentState = RepeatState.REPEAT_ONCE;
+                current_repeat_state = RepeatState.REPEAT_ONCE;
                 break;
+
             case REPEAT_ONCE:
-                currentState = RepeatState.INACTIVE;
+                current_repeat_state = RepeatState.INACTIVE;
                 break;
         }
     }
 
     private void updateButtonIcon() {
         ImageIcon icon;
-        switch (currentState) {
+        switch (current_repeat_state) {
             case INACTIVE:
                 icon = getIcon("/icons/repeat-song-512.png", 28, 28);
                 break;
+
             case REPEAT:
                 icon = getIcon("/icons/repeat-song-512.png", 28, 28);
                 break;
+
             case REPEAT_ONCE:
                 icon = getIcon("/icons/repeat-song-once-512.png", 28, 28);
                 break;
+
             default:
                 icon = getIcon("/icons/repeat-song-512.png", 28, 28);
                 break;
