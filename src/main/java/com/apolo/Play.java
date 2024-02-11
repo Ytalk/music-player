@@ -20,7 +20,8 @@ public class Play implements Runnable{
     private ChangeListener changeListener;
     private AdvancedPlayer player;
     private int pausedOnFrame = 1500;
-    File file;
+    private File file;
+    private int currentFrame = 0;
 
 
     //NO CONSTRUCTOR
@@ -38,7 +39,6 @@ public class Play implements Runnable{
 
         try{
             FileInputStream inputStream = new FileInputStream(file);
-
             this.player = new AdvancedPlayer(inputStream);
         }
         catch (JavaLayerException | IOException e) {
@@ -85,8 +85,20 @@ public class Play implements Runnable{
 
             System.out.println("Playback started!");
 
-            playing = true; // Marca como reproduzindo
-            fireStateChanged(); // Notifica ouvintes sobre a mudança de estado
+            playing = true; //marca como reproduzindo
+            fireStateChanged(); //notifica ouvintes sobre a mudança de estado
+
+            Thread frameCounterThread = new Thread(() -> {
+                while (playing) {
+                    try {
+                        Thread.sleep(10);
+                        currentFrame++;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            frameCounterThread.start();
 
             player.play();
         }
@@ -100,7 +112,7 @@ public class Play implements Runnable{
     public void stop() {
         if (playing) {
             player.close();
-            System.out.println("Playback is over!");
+            System.out.println("Playback is over!" + currentFrame);
 
             playing = false;
             fireStateChanged();
