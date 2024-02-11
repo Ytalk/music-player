@@ -23,6 +23,7 @@ public class Apolo extends JFrame{
     private CardLayout cardLayout;
     private Play music = new Play();
     private boolean pause = true;
+    private String music_path;
 
     private enum RepeatState { INACTIVE, REPEAT, REPEAT_ONCE }
     private RepeatState current_repeat_state = RepeatState.INACTIVE;
@@ -221,12 +222,22 @@ public class Apolo extends JFrame{
                         throw new musicException("Select a playlist first!", "Null Playlist");
                     else {
                         pause = false;
-                        String filePath = selectedPlaylist.getMp3List().getSelectedValue();
-                        System.out.println(filePath);
+                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        music.setMusic(filePath);
-                        musicThread = new Thread(music);
-                        musicThread.start();
+                        if( file_path.equals(music_path) ) {//resume
+                            music.setMusic(music_path);
+                            musicThread = new Thread(music);
+                            musicThread.start();
+                        }
+                        else{//new play
+                            System.out.println(file_path);
+                            music_path = file_path;
+                            music.setFrame();
+                            music.setMusic(music_path);
+                            musicThread = new Thread(music);
+                            musicThread.start();
+                        }
+
                     }
                 } catch(musicException ex){
                     ex.showMessage();
@@ -278,22 +289,24 @@ public class Apolo extends JFrame{
 
                     if (previousIndex >= 0) {
 
-                        String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//música anterior
-                        System.out.println(filePath);
+                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//música anterior
+                        System.out.println(file_path);
 
                         selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//muda na JList para a música anterior
 
+                        music_path = file_path;
+                        music.setFrame();
                         pause = false;
-                        music.setMusic(filePath);
+                        music.setMusic(file_path);
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
                     else {
                         System.out.println("Você já está na primeira música.");
-                        String filePath = selectedPlaylist.getMp3List().getSelectedValue();
+                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
                         pause = false;
-                        music.setMusic(filePath);
+                        music.setMusic(file_path);
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
@@ -347,21 +360,23 @@ public class Apolo extends JFrame{
 
                     if (nextIndex < selectedPlaylist.getMp3List().getModel().getSize()) {
 
-                        String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//próxima música
-                        System.out.println(filePath);
+                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//próxima música
+                        System.out.println(file_path);
 
                         selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//muda na JList para a próxima música
 
+                        music_path = file_path;
+                        music.setFrame();
                         pause = false;
-                        music.setMusic(filePath);
+                        music.setMusic(file_path);
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
                     else {
                         System.out.println("Não há mais músicas na lista.");
-                        String filePath = selectedPlaylist.getMp3List().getSelectedValue();
+                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        music.setMusic(filePath);
+                        music.setMusic(file_path);
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
