@@ -183,23 +183,25 @@ public class Apolo extends JFrame{
 
 
 
-        //TOCAR MUSICA E GRIDLAYOUT
-        JButton play_button = new JButton(  getIcon("/icons/48_circle_play_icon.png", 48, 48)  );
+
+
+        //TOCAR MUSICA E CONTROL-PLAYBACK
+        JButton play_button = new JButton(  getIcon("/icons/48_circle_play_icon.png", 43, 43)  );
         play_button.setBorder( BorderFactory.createEmptyBorder() );
-        play_button.setContentAreaFilled(false);
+        play_button.setBounds(370, 370, 50, 50);
+        //play_button.setContentAreaFilled(false);
         play_button.setFocusPainted(false);
-
-
+        add(play_button);
 
         play_button.addMouseListener(new MouseAdapter() {//inflate effect
             @Override
             public void mouseEntered(MouseEvent e) {
-                updateIcon(53);
+                updateIcon(48);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                updateIcon(48);
+                updateIcon(43);
             }
 
             private void updateIcon(int size) {
@@ -224,7 +226,7 @@ public class Apolo extends JFrame{
                         pause = false;
                         String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        if( file_path.equals(music_path) ) {//resume
+                        if( file_path.equals(music_path) ) {//resume or repeat without printPath
                             music.setMusic(music_path);
                             musicThread = new Thread(music);
                             musicThread.start();
@@ -247,26 +249,28 @@ public class Apolo extends JFrame{
 
 
 
-        JButton previous_button = new JButton(  getIcon("/icons/48_music_next_player_icon.png", 48, 48)  );
+        JButton previous_button = new JButton(  getIcon("/icons/48_music_next_player_icon.png", 38, 38)  );
+        previous_button.setBounds(300, 370, 43, 43);
         previous_button.setBorder(new EmptyBorder(0, 0, 0, 0));
-        previous_button.setContentAreaFilled(false);
+        //previous_button.setContentAreaFilled(false);
         previous_button.setFocusPainted(false);
+        add(previous_button);
 
         previous_button.addMouseListener( new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e){
-                updateIcon(52);
+                updateIcon(42);
             }
 
             public void mouseExited(java.awt.event.MouseEvent e){
-                updateIcon(48);
+                updateIcon(38);
             }
 
             public void mousePressed(java.awt.event.MouseEvent e){
-                updateIcon(43);
+                updateIcon(33);
             }
 
             public void mouseReleased(java.awt.event.MouseEvent e){
-                updateIcon(52);
+                updateIcon(42);
             }
 
             private void updateIcon(int size) {
@@ -318,26 +322,28 @@ public class Apolo extends JFrame{
 
 
 
-        JButton next_button = new JButton(  getIcon("/icons/o48_music_next_player_icon.png", 48, 48)  );
+        JButton next_button = new JButton(  getIcon("/icons/o48_music_next_player_icon.png", 38, 38)  );
+        next_button.setBounds(450, 370, 43, 43);
         next_button.setBorder(new EmptyBorder(0, 0, 0, 0));
-        next_button.setContentAreaFilled(false);
+        //next_button.setContentAreaFilled(false);
         next_button.setFocusPainted(false);
+        add(next_button);
 
         next_button.addMouseListener( new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e){
-                updateIcon(52);
+                updateIcon(42);
             }
 
             public void mouseExited(java.awt.event.MouseEvent e){
-                updateIcon(48);
+                updateIcon(38);
             }
 
             public void mousePressed(java.awt.event.MouseEvent e){
-                updateIcon(43);
+                updateIcon(33);
             }
 
             public void mouseReleased(java.awt.event.MouseEvent e){
-                updateIcon(52);
+                updateIcon(42);
             }
 
             private void updateIcon(int size) {
@@ -388,10 +394,11 @@ public class Apolo extends JFrame{
 
 
 
-        repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 28, 28) );
+        repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 23, 23) );
+        repeat_button.setBounds(120, 400, 25, 25);
         repeat_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         repeat_button.setFocusPainted(false);
-        repeat_button.setContentAreaFilled(false);
+        //repeat_button.setContentAreaFilled(false);
         add(repeat_button);
 
         repeat_button.addActionListener(e -> {
@@ -403,10 +410,10 @@ public class Apolo extends JFrame{
 
         music.addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
             if(music.isPlaying()){
-                play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 48, 48) );
+                play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 43, 43) );
             }
             else{
-                play_button.setIcon( getIcon("/icons/48_circle_play_icon.png", 48, 48) );
+                play_button.setIcon( getIcon("/icons/48_circle_play_icon.png", 43, 43) );
 
                 if(!pause ) {
                     String selectedPlaylistName = mainList.getSelectedValue();
@@ -416,16 +423,19 @@ public class Apolo extends JFrame{
                         if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && current_repeat_state == RepeatState.INACTIVE )
                             next_button.doClick();
 
-                        else if( current_repeat_state == RepeatState.REPEAT )
+                        else if( current_repeat_state == RepeatState.REPEAT ) {
+                            music.setFrame();
                             play_button.doClick();
+                        }
 
                         else if( current_repeat_state == RepeatState.REPEAT_ONCE ){
-                            if(counter_repeat_once < 1){
+                            music.setFrame();
+                            if(counter_repeat_once < 1){//repeat once
                                 play_button.doClick();
                                 ++counter_repeat_once;
                             }
                             else{
-                                if ( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() ) {
+                                if ( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() ) {//!(last song)
                                     next_button.doClick();
                                 }
                                 counter_repeat_once = 0;
@@ -440,22 +450,22 @@ public class Apolo extends JFrame{
 
 
 
-        GridLayout gridLayout = new GridLayout(1, 3);
+        /*GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
-        Panel control_panel = new Panel( gridLayout );
-        control_panel.add(previous_button);
-        control_panel.add(play_button);
-        control_panel.add(next_button);
-        control_panel.add(repeat_button);
-        control_panel.setBounds(300, 360, 250, 90);
-        add(control_panel);
+        Panel playback_control = new Panel( gridLayout );
+        playback_control.add(previous_button);
+        playback_control.add(play_button);
+        playback_control.add(next_button);
+        playback_control.add(repeat_button);
+        playback_control.setBounds(300, 370, 250, 55);
+        add(playback_control);*/
 
 
 
-        /*JLabel label = new JLabel();
-        label.setIcon( getIcon("/icons/Design sem nome.png", 400, 90) );
-        label.setBounds(50, 300, 400, 90);
-        add(label);*/
+        JLabel label = new JLabel();
+        label.setIcon( getIcon("/icons/playback_control.png", 400, 70) );
+        label.setBounds(200, 360, 400, 70);
+        add(label);
 
 
 
@@ -500,19 +510,19 @@ public class Apolo extends JFrame{
         ImageIcon icon;
         switch (current_repeat_state) {
             case INACTIVE:
-                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                icon = getIcon("/icons/repeat-song-512.png", 23, 23);
                 break;
 
             case REPEAT:
-                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                icon = getIcon("/icons/repeat-song-512.png", 23, 23);
                 break;
 
             case REPEAT_ONCE:
-                icon = getIcon("/icons/repeat-song-once-512.png", 28, 28);
+                icon = getIcon("/icons/repeat-song-once-512.png", 23, 23);
                 break;
 
             default:
-                icon = getIcon("/icons/repeat-song-512.png", 28, 28);
+                icon = getIcon("/icons/repeat-song-512.png", 23, 23);
                 break;
         }
         repeat_button.setIcon(icon);
