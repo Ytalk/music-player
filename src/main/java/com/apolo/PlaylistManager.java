@@ -35,12 +35,14 @@ public class PlaylistManager implements Serializable{
         playlists_panel = new JPanel();
         cardLayout = new CardLayout();
         playlists_panel.setLayout(cardLayout);
-        playlists_panel.setBackground(new Color( 129, 13, 175));
+        playlists_panel.setBackground(Color.BLACK);//cor inicial do card
 
 
         //JLIST DE PLAYLISTS
         mainList = new JList<>(new String[0]);
         mainList.setBackground(new Color(64, 64, 64));
+        mainList.setCellRenderer(new PurpleListRenderer());
+        JScrollPane scrollPlaylists = new JScrollPane(mainList);
 
         JLabel mainList_label = new JLabel("Playlists");//label de playlist manager
         mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -49,9 +51,9 @@ public class PlaylistManager implements Serializable{
         mainList_label.setForeground(Color.WHITE);
 
         mainList_panel = new Panel(new BorderLayout());//panel de playlist manager
-        mainList_panel.setBackground(new Color(33, 41, 48));//cor de fundo que pega a label
+        mainList_panel.setBackground(Color.BLACK);//cor de fundo que pega a label
         mainList_panel.add(mainList_label, BorderLayout.NORTH);
-        mainList_panel.add(mainList, BorderLayout.CENTER);
+        mainList_panel.add(scrollPlaylists, BorderLayout.CENTER);
 
     }
 
@@ -160,6 +162,26 @@ public class PlaylistManager implements Serializable{
 
     public PlaylistManager getManager(){
         return manager;
+    }
+
+
+    public class PurpleListRenderer extends DefaultListCellRenderer  implements Serializable{
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            if (isSelected) {
+                //item selecionado
+                renderer.setBackground(new Color(129, 13, 175));
+                renderer.setForeground(Color.BLACK);
+            } else {
+                //item não selecionado
+                renderer.setBackground(list.getBackground());
+                renderer.setForeground(Color.BLACK);
+            }
+
+            return renderer;
+        }
     }
 
 

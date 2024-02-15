@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.Serializable;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
+import javax.swing.border.Border;
 
 public class Playlist implements Serializable {
 
@@ -29,19 +30,15 @@ public class Playlist implements Serializable {
         mp3List = new JList<>();
         mp3List.setModel(listModel);
         mp3List.setCellRenderer(new FileNameCellRenderer());
-        scrollPane = new JScrollPane(mp3List);
         mp3List.setBackground(new Color(64, 64, 64));
+        scrollPane = new JScrollPane(mp3List);
 
         playlist = new JPanel(new BorderLayout());
-        playlist.setBackground(new Color(33, 41, 48));
+        playlist.setBackground(Color.BLACK);//cor de fundo do cabeçalho 33, 41, 48 / 129, 13, 175
         playlist.add(this.name, BorderLayout.NORTH);
         playlist.add(scrollPane, BorderLayout.CENTER);
     }
 
-
-    public String getName(){
-        return name.getText();
-    }
 
     public JPanel getPlaylist(){
         return playlist;
@@ -68,7 +65,21 @@ public class Playlist implements Serializable {
                 value = new File((String) value).getName().replaceFirst("[.][^.]+$", "");//obtém apenas o nome do arquivo e retira extensão
                 
             }
-            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            //método da superclasse para obter o componente de renderização padrão
+            Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            //verifica se o item está selecionado
+            if (isSelected) {
+                //item selecionado
+                renderer.setBackground(new Color(129, 13, 175));
+                renderer.setForeground(Color.BLACK);
+            } else {
+                //item não selecionado
+                renderer.setBackground(list.getBackground());
+                renderer.setForeground(Color.BLACK);
+            }
+
+            return renderer;
         }
     }
 

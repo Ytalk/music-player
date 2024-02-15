@@ -45,8 +45,8 @@ $ make run
 
 #Linux/macOS:
 $ chmod +x mvnw
-$ java -jar target/Apolo.jar
+$ ./mvnw exec:java
 
 #Windows:
-$ java -jar target/Apolo.jar
+$ ./mvnw exec:java
 ```
