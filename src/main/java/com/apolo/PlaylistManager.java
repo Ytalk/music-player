@@ -32,17 +32,28 @@ public class PlaylistManager implements Serializable{
         playlists = new HashMap<>();
 
         //CARD
+<<<<<<< HEAD
         playlists_cardlayout = new CardLayout();
         playlists_panel = new JPanel( playlists_cardlayout );
         playlists_panel.setBackground(Color.BLACK);//cor do panel-card sem playlist
+=======
+        playlists_panel = new JPanel();
+        cardLayout = new CardLayout();
+        playlists_panel.setLayout(cardLayout);
+        playlists_panel.setBackground(Color.BLACK);//cor inicial do card
+>>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
 
 
         //JLIST DE PLAYLISTS
         mainList = new JList<>();
         mainList.setBackground(new Color(64, 64, 64));
         mainList.setCellRenderer(new PurpleListRenderer());
+<<<<<<< HEAD
         scrollPlaylists = new JScrollPane(mainList);
         scrollPlaylists.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+=======
+        JScrollPane scrollPlaylists = new JScrollPane(mainList);
+>>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
 
         JLabel mainList_label = new JLabel("Playlists");//label de playlist manager
         mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -54,6 +65,10 @@ public class PlaylistManager implements Serializable{
         mainList_panel.setBackground(Color.BLACK);//cor de fundo que pega a label
         mainList_panel.add(mainList_label, BorderLayout.NORTH);
         mainList_panel.add(scrollPlaylists, BorderLayout.CENTER);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
     }
 
 
@@ -169,8 +184,11 @@ public class PlaylistManager implements Serializable{
 
 
     public class PurpleListRenderer extends DefaultListCellRenderer  implements Serializable{
+<<<<<<< HEAD
         private static final long serialVersionUID = 6L;
 
+=======
+>>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -179,6 +197,7 @@ public class PlaylistManager implements Serializable{
                 //item selecionado
                 renderer.setBackground(new Color(129, 13, 175));
                 renderer.setForeground(Color.BLACK);
+<<<<<<< HEAD
             }
             else {
                 //não selecionado
@@ -189,6 +208,12 @@ public class PlaylistManager implements Serializable{
                 else {
                     renderer.setBackground( new Color( 40, 40, 40) );
                 }
+=======
+            } else {
+                //item não selecionado
+                renderer.setBackground(list.getBackground());
+                renderer.setForeground(Color.BLACK);
+>>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
             }
 
             return renderer;
