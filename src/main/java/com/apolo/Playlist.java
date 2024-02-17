@@ -11,37 +11,33 @@ import javax.swing.JLabel;
 public class Playlist implements Serializable {
 
     private static final long serialVersionUID = 6L;
-    JScrollPane scrollPane;//painel para scrollar a lista de musicas
-    DefaultListModel<String> listModel;//representa o modelo/gerenciador da playlist
-    JList<String> mp3List;//representa a lista de musicas
-    JLabel name;
-    JPanel playlist;//painel com as informações de uma playlist
+    private JScrollPane mp3pathlist_scroll;//painel para scrollar a lista de musicas
+    private DefaultListModel<String> listModel;//representa o modelo/gerenciador da playlist
+    private JList<String> mp3pathlist;//representa a lista de musicas
+    private JLabel playlist_label;
+    private JPanel playlist;//painel com as informações de uma playlist
 
     public Playlist(String name) {
-        this.name = new JLabel(name);
-        this.name.setHorizontalAlignment(SwingConstants.CENTER);
-        this.name.setVerticalAlignment(SwingConstants.CENTER);
-        this.name.setFont(new Font("Arial", Font.BOLD, 20));
-        this.name.setForeground(Color.WHITE);
+        playlist_label = new JLabel(name);
+        playlist_label.setHorizontalAlignment(SwingConstants.CENTER);
+        playlist_label.setVerticalAlignment(SwingConstants.CENTER);
+        playlist_label.setFont(new Font("Arial", Font.BOLD, 20));
+        playlist_label.setForeground(Color.WHITE);
 
         listModel = new DefaultListModel<>();
-
-        mp3List = new JList<>();
-        mp3List.setModel(listModel);
-        mp3List.setCellRenderer(new FileNameCellRenderer());
-        scrollPane = new JScrollPane(mp3List);
-        mp3List.setBackground(new Color(64, 64, 64));
+        mp3pathlist = new JList<>();
+        mp3pathlist.setModel(listModel);
+        mp3pathlist.setCellRenderer(new FileNameCellRenderer());
+        mp3pathlist.setBackground(new Color(64, 64, 64));
+        mp3pathlist_scroll = new JScrollPane(mp3pathlist);
+        mp3pathlist_scroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         playlist = new JPanel(new BorderLayout());
-        playlist.setBackground(new Color(33, 41, 48));
-        playlist.add(this.name, BorderLayout.NORTH);
-        playlist.add(scrollPane, BorderLayout.CENTER);
+        playlist.setBackground(Color.BLACK);//cor de fundo do cabeçalho 33, 41, 48 / 129, 13, 175
+        playlist.add(playlist_label, BorderLayout.NORTH);
+        playlist.add(mp3pathlist_scroll, BorderLayout.CENTER);
     }
 
-
-    public String getName(){
-        return name.getText();
-    }
 
     public JPanel getPlaylist(){
         return playlist;
@@ -54,7 +50,7 @@ public class Playlist implements Serializable {
 
 
     public JList<String> getMp3List(){
-        return mp3List;
+        return mp3pathlist;
     }
 
 
@@ -66,15 +62,33 @@ public class Playlist implements Serializable {
                                                       boolean isSelected, boolean cellHasFocus) {
             if (value instanceof String) {
                 value = new File((String) value).getName().replaceFirst("[.][^.]+$", "");//obtém apenas o nome do arquivo e retira extensão
-                
             }
-            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            //método da superclasse para obter o componente de renderização padrão
+            Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            if (isSelected) {
+                //item selecionado
+                renderer.setBackground(new Color(129, 13, 175));
+                renderer.setForeground(Color.BLACK);
+            }
+            else {
+                //não selecionado
+                renderer.setForeground(Color.BLACK);
+                if (index % 2 == 0) {
+                    renderer.setBackground( new Color(64, 64, 64) );
+                }
+                else {
+                    renderer.setBackground( new Color( 40, 40, 40) );
+                }
+            }
+
+            return renderer;
         }
     }
 
 
     public void removeSelectedMusic() {
-        int selectedIndex = mp3List.getSelectedIndex();
+        int selectedIndex = mp3pathlist.getSelectedIndex();
         if (selectedIndex >= 0) {
             listModel.remove(selectedIndex);
         }

@@ -1,20 +1,11 @@
 run:
-	java -jar target/Apolo.jar
+	./mvnw.cmd exec:run
 
-
-lcompile:
+compile:
 	./mvnw clean install
-
-wcompile:
-	mvnw.cmd clean install
-
 
 lpermission:
 	chmod +x mvnw
 
-
-wreset:
-	mvnw.cmd clean install
-
-lreset:
+reset:
 	./mvnw clean install

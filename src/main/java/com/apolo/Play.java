@@ -82,6 +82,7 @@ public class Play implements Runnable{
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Playback complete!");
                     player.close();
+                    setFrame();
 
                     playing = false;
                     fireStateChanged();
@@ -126,6 +127,7 @@ public class Play implements Runnable{
                 public void playbackFinished(PlaybackEvent evt) {
                     System.out.println("Playback complete!");
                     player.close();
+                    setFrame();
 
                     playing = false;
                     fireStateChanged();
