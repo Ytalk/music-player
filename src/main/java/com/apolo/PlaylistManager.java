@@ -16,62 +16,59 @@ import java.io.ObjectInputValidation;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class PlaylistManager implements Serializable{
+/**
+ * The `PlaylistManager` class manages playlists in the music player application.
+ * It provides functionality to create, delete, and load playlists, as well as access
+ * the main list of playlists and the panel containing playlist information.
+ */
+public class PlaylistManager implements Serializable {
 
     private static final long serialVersionUID = 6L;
-    private JList<String> mainList;//jlist com str para card
-    private JPanel playlists_panel;//card
-    private Panel mainList_panel;//panel playlist manager
-    private CardLayout playlists_cardlayout;
-    private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
-    private PlaylistManager manager;
-    JScrollPane scrollPlaylists;
 
+    private JList<String> mainList; // JList displaying the main list of playlists
+    private JPanel playlists_panel; // Panel containing playlists
+    private Panel mainList_panel; // Panel containing the main list of playlists
+    private CardLayout playlists_cardlayout; // Card layout for managing playlists
+    private Map<String, Playlist> playlists; // Map to store playlist instances
+    private PlaylistManager manager; // Instance of the playlist manager
+    private JScrollPane scrollPlaylists; // Scroll pane for the main list of playlists
 
+    /**
+     * Constructs a new PlaylistManager object.
+     * Initializes data structures and UI components for managing playlists.
+     */
     public PlaylistManager() {
         playlists = new HashMap<>();
 
-        //CARD
-<<<<<<< HEAD
+        // Initialize card layout for playlists
         playlists_cardlayout = new CardLayout();
-        playlists_panel = new JPanel( playlists_cardlayout );
-        playlists_panel.setBackground(Color.BLACK);//cor do panel-card sem playlist
-=======
-        playlists_panel = new JPanel();
-        cardLayout = new CardLayout();
-        playlists_panel.setLayout(cardLayout);
-        playlists_panel.setBackground(Color.BLACK);//cor inicial do card
->>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
+        playlists_panel = new JPanel(playlists_cardlayout);
+        playlists_panel.setBackground(Color.BLACK);
 
-
-        //JLIST DE PLAYLISTS
+        // Initialize main list of playlists
         mainList = new JList<>();
         mainList.setBackground(new Color(64, 64, 64));
         mainList.setCellRenderer(new PurpleListRenderer());
-<<<<<<< HEAD
         scrollPlaylists = new JScrollPane(mainList);
         scrollPlaylists.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-=======
-        JScrollPane scrollPlaylists = new JScrollPane(mainList);
->>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
 
-        JLabel mainList_label = new JLabel("Playlists");//label de playlist manager
+        JLabel mainList_label = new JLabel("Playlists");
         mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
         mainList_label.setVerticalAlignment(SwingConstants.CENTER);
         mainList_label.setFont(new Font("Arial", Font.BOLD, 20));
         mainList_label.setForeground(Color.WHITE);
 
-        mainList_panel = new Panel(new BorderLayout());//panel de playlist manager
-        mainList_panel.setBackground(Color.BLACK);//cor de fundo que pega a label
+        mainList_panel = new Panel(new BorderLayout());
+        mainList_panel.setBackground(Color.BLACK);
         mainList_panel.add(mainList_label, BorderLayout.NORTH);
         mainList_panel.add(scrollPlaylists, BorderLayout.CENTER);
-<<<<<<< HEAD
-=======
-
->>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
     }
 
-
+    /**
+     * Creates a new playlist with the specified name.
+     * Adds the playlist to the manager and updates the UI accordingly.
+     * @return The created playlist object.
+     */
     public Playlist creatPlaylist(){
 
         String playlistName = "";
@@ -98,7 +95,12 @@ public class PlaylistManager implements Serializable{
         return null;
     }
 
-
+    /**
+     * Deletes the selected playlist from the manager.
+     * Removes the playlist from the UI and updates the main list of playlists.
+     * @param pm The playlist manager instance.
+     * @throws musicException If no playlist is selected for deletion.
+     */
     public void deletePlaylist(PlaylistManager pm) throws musicException{
         String playlist_name = mainList.getSelectedValue();
         Playlist playlist = playlists.get(playlist_name);
@@ -121,31 +123,51 @@ public class PlaylistManager implements Serializable{
     }
 
 
-    public JList getMainList(){
+    /**
+     * Retrieves the main list of playlists.
+     * @return The JList containing the main list of playlists.
+     */
+    public JList getMainList() {
         return mainList;
     }
 
-
-    public Panel getPlaylistManagerPanel(){
+    /**
+     * Retrieves the panel containing the playlist manager UI components.
+     * @return The panel containing the main list of playlists.
+     */
+    public Panel getPlaylistManagerPanel() {
         return mainList_panel;
     }
 
-
+    /**
+     * Retrieves the panel containing the playlists.
+     * @return The panel containing the playlists.
+     */
     public JPanel getPlaylistCard() {
         return playlists_panel;
     }
 
-
-    public Map<String, Playlist> getMap(){
+    /**
+     * Retrieves the map of playlists.
+     * @return The map containing playlist names as keys and playlist objects as values.
+     */
+    public Map<String, Playlist> getMap() {
         return playlists;
     }
 
-
-    public CardLayout getPlaylistsCardLayout(){
+    /**
+     * Retrieves the card layout for managing playlists.
+     * @return The CardLayout object used for managing playlists.
+     */
+    public CardLayout getPlaylistsCardLayout() {
         return playlists_cardlayout;
     }
 
 
+    /**
+     * Saves the current state of the PlaylistManager to a file.
+     * @param pm The PlaylistManager instance to be saved.
+     */
     public void saveToFile(PlaylistManager pm){
         manager = pm;
 
@@ -158,37 +180,33 @@ public class PlaylistManager implements Serializable{
         }
     }
 
-
+    /**
+     * Loads the saved state of the PlaylistManager from a file.
+     */
     public void loadFile(){
-
         try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OIS para ler objetos do arquivo
-
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
-
-            //reader.registerValidation(this, 0);//registra o objeto para validação. validação imediata (prioridade 0 / alta).
         }
-
         catch (FileNotFoundException e){
             JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
         }
-
         catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Something went wrong loading the playlists!", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-
+    /**
+     * Retrieves the PlaylistManager instance.
+     * @return The PlaylistManager instance.
+     */
     public PlaylistManager getManager(){
         return manager;
     }
 
 
     public class PurpleListRenderer extends DefaultListCellRenderer  implements Serializable{
-<<<<<<< HEAD
         private static final long serialVersionUID = 6L;
 
-=======
->>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -197,7 +215,6 @@ public class PlaylistManager implements Serializable{
                 //item selecionado
                 renderer.setBackground(new Color(129, 13, 175));
                 renderer.setForeground(Color.BLACK);
-<<<<<<< HEAD
             }
             else {
                 //não selecionado
@@ -208,12 +225,6 @@ public class PlaylistManager implements Serializable{
                 else {
                     renderer.setBackground( new Color( 40, 40, 40) );
                 }
-=======
-            } else {
-                //item não selecionado
-                renderer.setBackground(list.getBackground());
-                renderer.setForeground(Color.BLACK);
->>>>>>> 2845dfc72293268ffb2dc0dcf45246d137aa3f30
             }
 
             return renderer;
