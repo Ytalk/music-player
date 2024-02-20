@@ -188,7 +188,6 @@ public class Apolo extends JFrame{
         //TOCAR MUSICA E CONTROL-PLAYBACK
         JButton play_button = new JButton(  getIcon("/icons/48_circle_play_icon.png", 43, 43)  );
         play_button.setBorder( BorderFactory.createEmptyBorder() );
-        play_button.setBounds(525, 360, 50, 50);
         play_button.setBackground(new Color(64, 64, 64));
         play_button.setContentAreaFilled(false);
         play_button.setFocusPainted(false);
@@ -251,7 +250,6 @@ public class Apolo extends JFrame{
 
 
         JButton previous_button = new JButton(  getIcon("/icons/48_music_next_player_icon.png", 38, 38)  );
-        previous_button.setBounds(465, 365, 43, 43);
         previous_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         previous_button.setContentAreaFilled(false);
         previous_button.setBackground(new Color(64, 64, 64));
@@ -326,7 +324,6 @@ public class Apolo extends JFrame{
 
 
         JButton next_button = new JButton(  getIcon("/icons/o48_music_next_player_icon.png", 38, 38)  );
-        next_button.setBounds(595, 365, 43, 43);
         next_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         next_button.setContentAreaFilled(false);
         next_button.setBackground(new Color(64, 64, 64));
@@ -401,7 +398,6 @@ public class Apolo extends JFrame{
 
 
         repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 23, 23) );
-        repeat_button.setBounds(660, 373, 25, 25);
         repeat_button.setBorder(new EmptyBorder(0, 0, 0, 0));
         repeat_button.setFocusPainted(false);
         repeat_button.setContentAreaFilled(false);
@@ -457,23 +453,28 @@ public class Apolo extends JFrame{
 
 
 
-        /*GridLayout gridLayout = new GridLayout(1, 4);
+        JLabel label = new JLabel();
+        label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
+
+
+        GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
         Panel playback_control = new Panel( gridLayout );
+        playback_control.setBackground(new Color(64, 64, 64));
         playback_control.add(previous_button);
         playback_control.add(play_button);
         playback_control.add(next_button);
         playback_control.add(repeat_button);
-        playback_control.setBounds(300, 370, 250, 55);
-        add(playback_control);*/
 
 
-
-        JLabel label = new JLabel();
-        label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
-        label.setBounds(350, 350, 400, 70);
-        add(label);
-
+        JPanel mainPanel = new JPanel(null);
+        playback_control.setBounds(115, 11, 230, 48);
+        label.setBounds(0, 0, 400, 70);
+        mainPanel.setBackground( new Color( 40, 40, 40) );
+        mainPanel.add(playback_control);
+        mainPanel.add(label);
+        mainPanel.setBounds(350, 350, 400, 70);
+        add(mainPanel);
 
 
         //DETALHES DO FRAME
