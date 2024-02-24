@@ -51,7 +51,7 @@ public class Playlist implements Serializable {
         listModel = new DefaultListModel<>();
         mp3pathlist = new JList<>();
         mp3pathlist.setModel(listModel);
-        mp3pathlist.setCellRenderer(new FileNameCellRenderer());
+        mp3pathlist.setCellRenderer(new musicCellRenderer());
         mp3pathlist.setBackground(new Color(64, 64, 64));
         mp3pathlist_scroll = new JScrollPane(mp3pathlist);
         mp3pathlist_scroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -103,83 +103,68 @@ public class Playlist implements Serializable {
     /**
      * Custom cell renderer for displaying file names in the playlist.
      */
-    public class FileNameCellRenderer extends DefaultListCellRenderer implements Serializable {
+    public class musicCellRenderer extends DefaultListCellRenderer implements Serializable {
         private static final long serialVersionUID = 6L;
 
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
-            JPanel panel = new JPanel(new BorderLayout());
+            JPanel musicPanel = new JPanel(new BorderLayout());//panel for every JList row
 
             if (value instanceof String) {
-                // Obtain only the file name without extension
+                //obtain only the file name without path or extension
                 String fileName = new File((String) value).getName().replaceFirst("[.][^.]+$", "");
 
-                // Get the album artwork
+                //get the album artwork
                 String filePath = (String) list.getModel().getElementAt(index);
-                ImageIcon albumArt = getMP3AlbumArtwork(filePath);
 
-                // Get the title, artist, and duration of the MP3
+                //get the albumArt, title, and duration of the MP3 with JAudioTagger
+                ImageIcon albumArt = getMP3AlbumArtwork(filePath);
                 String title = getMP3Title(filePath);
                 String duration = getMP3Duration(filePath);
-                String artist = getMP3Artist(filePath);
 
 
-                // Create labels for the title, artist, and duration
-                JLabel titleLabel = new JLabel(title);
-                titleLabel.setForeground(Color.BLACK);
+                //creates labels for MP3 information (title, duration and albumArt). and a panel to allocate this information.
+                JPanel infoPanel = new JPanel( new BorderLayout() );
+                infoPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
 
-                JLabel artistLabel = new JLabel(artist);
-                artistLabel.setForeground(Color.BLACK);
+                if( title != null && !(title.equals("")) ) {
+                    JLabel titleLabel = new JLabel(title);
+                    titleLabel.setForeground(Color.BLACK);
+                    infoPanel.add(titleLabel, BorderLayout.CENTER );
+                } else {
+                    JLabel fileNameLabel = new JLabel(fileName);
+                    fileNameLabel.setForeground(Color.BLACK);
+                    infoPanel.add( fileNameLabel, BorderLayout.CENTER );
+                }
 
                 JLabel durationLabel = new JLabel(duration);
                 durationLabel.setForeground(Color.BLACK);
-
-                // Create a panel to hold the title, artist, and duration labels
-                GridLayout gl = new GridLayout(1, 2);
-                gl.setHgap(20);
-                JPanel infoPanel = new JPanel(gl);
-                infoPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
+                infoPanel.add(durationLabel, BorderLayout.EAST);
 
 
-                /*if( artist != null && !(artist.equals("")) ) {
-                    infoPanel.add(artistLabel);
-                } else{
-                    infoPanel.add(new JLabel("unknown") );
-                }*/
-
-                if( title != null ) {
-                    infoPanel.add(titleLabel);
-                } else {
-                    infoPanel.add( new JLabel(fileName) );
-                }
-
-                infoPanel.add(durationLabel);
-
-                // Add the album artwork and info panel to the main panel
+                //add the album artwork and info panel to the main panel
                 if (albumArt != null) {
                     JLabel albumArtLabel = new JLabel(albumArt);
-                    panel.add(albumArtLabel, BorderLayout.WEST);
+                    musicPanel.add(albumArtLabel, BorderLayout.WEST);
                 }
-                panel.add(infoPanel, BorderLayout.CENTER);
+                musicPanel.add(infoPanel, BorderLayout.CENTER);
             } else {
-                panel.add(new JLabel(value.toString()), BorderLayout.CENTER);
+                musicPanel.add(new JLabel(value.toString()), BorderLayout.CENTER);
             }
 
 
             // Customize the appearance based on selection and index
             if (isSelected) {
-                panel.setBackground(new Color(129, 13, 175));
-                panel.setForeground(Color.BLACK);
+                musicPanel.setBackground(new Color(129, 13, 175));
             } else {
-                panel.setForeground(Color.BLACK);
-                panel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
+                musicPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
             }
 
             // Configure as propriedades de exibição do JLabel
-            panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Adicione alguma margem ao redor do texto
+            musicPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Adicione alguma margem ao redor do texto
 
-            return panel;
+            return musicPanel;
         }
 
         private String getMP3Duration(String filePath) {
@@ -231,11 +216,8 @@ public class Playlist implements Serializable {
                     if (artwork != null) {
                         byte[] imageData = artwork.getBinaryData();
                         if (imageData != null) {
-                            // Cria um ImageIcon com a imagem de capa do álbum
                             ImageIcon icon = new ImageIcon(imageData);
-                            // Redimensiona a imagem para 50x50 pixels
                             Image scaledImage = icon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-                            // Cria um novo ImageIcon com a imagem redimensionada
                             return new ImageIcon(scaledImage);
                         }
                     }
