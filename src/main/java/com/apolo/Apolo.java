@@ -97,7 +97,7 @@ public class Apolo extends JFrame{
 
 
         JButton delMusicButton = new JButton(deleteIcon);
-        delMusicButton.setBounds(330, 27, 20, 10);// posição e tamanho
+        delMusicButton.setBounds(320, 27, 20, 10);// posição e tamanho
         delMusicButton.setBackground(Color.BLACK);
         delMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         delMusicButton.setFocusPainted(false);
@@ -126,7 +126,7 @@ public class Apolo extends JFrame{
 
 
         //adiciona a lista principal e as playlists (card) ao JFrame
-        playlist_manager.getPlaylistCard().setBounds(295, 20, 520, 310);//posição e tamanho do card de uma playlist
+        playlist_manager.getPlaylistCard().setBounds(283, 20, 534, 310);//posição e tamanho do card de uma playlist
         add(playlist_manager.getPlaylistCard());
 
 
@@ -135,12 +135,12 @@ public class Apolo extends JFrame{
         JButton createPlaylistButton = new JButton(addMusicIcon);
         createPlaylistButton.setBackground(Color.BLACK);
         createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
-        createPlaylistButton.setBounds(225, 22, 20, 20);
+        createPlaylistButton.setBounds(220, 22, 20, 20);
         createPlaylistButton.setFocusPainted(false);
         add(createPlaylistButton);
 
         createPlaylistButton.addActionListener(e -> {
-            playlist = playlist_manager.creatPlaylist();
+            playlist_manager.createPlaylist();
 
             if(mainList.getModel().getSize() == 1) {
                 playlist_manager.getPlaylistCard().revalidate();
@@ -170,7 +170,7 @@ public class Apolo extends JFrame{
 
 
 
-        playlist_manager.getPlaylistManagerPanel().setBounds(20, 20, 250, 400);//posição e tamanho do panel com as playlists
+        playlist_manager.getPlaylistManagerPanel().setBounds(20, 20, 242, 400);//posição e tamanho do panel com as playlists
         add(playlist_manager.getPlaylistManagerPanel());
 
 

@@ -40,7 +40,7 @@ public class Playlist implements Serializable {
      * @param name The name of the playlist.
      */
     public Playlist(String name) {
-        // Initialize the playlist label
+        //initialize the playlist label
         playlist_label = new JLabel(name);
         playlist_label.setHorizontalAlignment(SwingConstants.CENTER);
         playlist_label.setVerticalAlignment(SwingConstants.CENTER);

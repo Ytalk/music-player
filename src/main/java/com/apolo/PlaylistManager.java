@@ -69,31 +69,36 @@ public class PlaylistManager implements Serializable {
      * Adds the playlist to the manager and updates the UI accordingly.
      * @return The created playlist object.
      */
-    public Playlist creatPlaylist(){
+    public void createPlaylist() {
+        String playlistName;
 
-        String playlistName = "";
-        while( playlistName.length() < 1 || playlistName.length() > 20 ) {
+        while (true) {
             playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
 
             if (playlistName == null) {
                 break;
             }
+
+            if (playlistName.length() < 1 || playlistName.length() > 20) {
+                JOptionPane.showMessageDialog(null, "Playlist name must be between 1 and 20 characters.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
+            } else if (playlistName.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Playlist name cannot be empty or consist only of whitespace.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
+            } else if (playlists.containsKey(playlistName)) {
+                JOptionPane.showMessageDialog(null, "Playlist with this name already exists. Please choose a different name.", "Duplicate Name", JOptionPane.ERROR_MESSAGE);
+            } else {
+                Playlist playlist = new Playlist(playlistName);
+                playlists.put(playlistName, playlist);
+
+                mainList.setListData(playlists.keySet().toArray(new String[0]));
+
+                playlists_panel.add(playlist.getPlaylist(), playlistName);
+                return;
+            }
         }
 
-        if (playlistName != null) {
-            Playlist playlist = new Playlist(playlistName);
-            playlists.put(playlistName, playlist);
-
-            //atualiza a mainList com os nomes das playlists existentes
-            mainList.setListData(playlists.keySet().toArray(new String[0]));
-
-            //adiciona a nova playlist ao card
-            playlists_panel.add(playlist.getPlaylist(), playlistName);
-
-            return playlist;
-        }
-        return null;
+        return;
     }
+
 
     /**
      * Deletes the selected playlist from the manager.
@@ -111,10 +116,18 @@ public class PlaylistManager implements Serializable {
                 playlists_panel.remove(playlist.getPlaylist());
                 playlists.remove(playlist_name);
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
+
+                if (!playlists.isEmpty()) {
+                    mainList.setSelectedIndex(0);
+                    String firstPlaylist = mainList.getSelectedValue();
+                    Playlist firstPlaylistInstance = playlists.get(firstPlaylist);
+                    playlists_cardlayout.show(playlists_panel, firstPlaylist);
+                } else {
+                    // Não há mais playlists, volte para o playlists_panel vazio
+                    playlists_cardlayout.show(playlists_panel, "vazio");
+                }
+
                 pm.saveToFile(pm);
-            }
-            else{//NO or X
-                return;
             }
         }
         else{
@@ -219,12 +232,7 @@ public class PlaylistManager implements Serializable {
             else {
                 //não selecionado
                 renderer.setForeground(Color.BLACK);
-                if (index % 2 == 0) {
-                    renderer.setBackground( new Color(64, 64, 64) );
-                }
-                else {
-                    renderer.setBackground( new Color( 40, 40, 40) );
-                }
+                renderer.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
             }
 
             return renderer;
