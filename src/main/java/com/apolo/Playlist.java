@@ -95,9 +95,7 @@ public class Playlist implements Serializable {
      */
     public void removeSelectedMusic() {
         int selectedIndex = mp3pathlist.getSelectedIndex();
-        if (selectedIndex >= 0) {
-            listModel.remove(selectedIndex);
-        }
+        listModel.remove(selectedIndex);
     }
 
     /**
@@ -128,7 +126,7 @@ public class Playlist implements Serializable {
                 JPanel infoPanel = new JPanel( new BorderLayout() );
                 infoPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
 
-                if( title != null && !(title.equals("")) ) {
+                if( title != null && !(title.isEmpty()) ) {
                     JLabel titleLabel = new JLabel(title);
                     titleLabel.setForeground(Color.BLACK);
                     infoPanel.add(titleLabel, BorderLayout.CENTER );

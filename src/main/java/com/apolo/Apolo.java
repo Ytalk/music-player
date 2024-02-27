@@ -15,11 +15,17 @@ import java.io.File;
 public class Apolo extends JFrame{
 
     Thread musicThread = new Thread();
+
     private Map<String, Playlist> playlists;//armazena instâncias de Playlist
     private JList<String> mainList;
     private Playlist playlist;
     private CardLayout cardLayout;
-    private Play music = new Play();
+
+    private JProgressBar progressBar = new JProgressBar();
+    private JLabel durationLabel = new JLabel( "00:00" );
+    private JLabel progressLabel = new JLabel( "00:00" );
+
+    private Play music = new Play( progressBar );
     private boolean pause = true;
     private String music_path;
 
@@ -59,7 +65,7 @@ public class Apolo extends JFrame{
         JButton addMusicButton = new JButton(addMusicIcon);
         addMusicButton.setBackground(Color.BLACK);
         addMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
-        addMusicButton.setBounds(760, 22, 20, 20);
+        addMusicButton.setBounds(758, 22, 20, 20);
         addMusicButton.setFocusPainted(false);
         add(addMusicButton);
 
@@ -131,11 +137,11 @@ public class Apolo extends JFrame{
 
 
 
-        //CRIAR OU DELETAR PLAYLIST (deve ser analisado o salvamento)
+        //CRIAR OU DELETAR PLAYLIST
         JButton createPlaylistButton = new JButton(addMusicIcon);
         createPlaylistButton.setBackground(Color.BLACK);
         createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
-        createPlaylistButton.setBounds(220, 22, 20, 20);
+        createPlaylistButton.setBounds(218, 22, 20, 20);
         createPlaylistButton.setFocusPainted(false);
         add(createPlaylistButton);
 
@@ -162,6 +168,8 @@ public class Apolo extends JFrame{
         delete_playlist_button.addActionListener(e -> {
             try {
                 playlist_manager.deletePlaylist(playlist_manager);
+                addMusicButton.repaint();
+                delMusicButton.repaint();
             }
             catch (musicException ex){
                 ex.showMessage();
@@ -228,6 +236,8 @@ public class Apolo extends JFrame{
 
                         if( file_path.equals(music_path) ) {//resume or repeat without printPath
                             music.setMusic(music_path);
+                            durationLabel.setText( music.getFormatDuration() );
+
                             musicThread = new Thread(music);
                             musicThread.start();
                         }
@@ -235,7 +245,10 @@ public class Apolo extends JFrame{
                             System.out.println(file_path);
                             music_path = file_path;
                             music.setFrame();
+
                             music.setMusic(music_path);
+                            durationLabel.setText( music.getFormatDuration() );
+
                             musicThread = new Thread(music);
                             musicThread.start();
                         }
@@ -301,7 +314,10 @@ public class Apolo extends JFrame{
                         music_path = file_path;
                         music.setFrame();
                         pause = false;
+
                         music.setMusic(file_path);
+                        durationLabel.setText( music.getFormatDuration() );
+
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
@@ -375,7 +391,10 @@ public class Apolo extends JFrame{
                         music_path = file_path;
                         music.setFrame();
                         pause = false;
+
                         music.setMusic(file_path);
+                        durationLabel.setText( music.getFormatDuration() );
+
                         musicThread = new Thread(music);
                         musicThread.start();
                     }
@@ -418,7 +437,7 @@ public class Apolo extends JFrame{
             else{
                 play_button.setIcon( getIcon("/icons/48_circle_play_icon.png", 43, 43) );
 
-                if(!pause ) {
+                if(!pause) {
                     String selectedPlaylistName = mainList.getSelectedValue();
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
@@ -457,6 +476,31 @@ public class Apolo extends JFrame{
         label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
 
 
+        // Inicia a thread para atualizar o tempo de progresso
+        Thread progressThread = new Thread(() -> {
+            while (true) {
+                // Obtenha o tempo de progresso da música
+                String progressTime = music.getProgress();
+
+                // Atualize a label na interface gráfica com o tempo de progresso
+                SwingUtilities.invokeLater(() -> {
+                    if( !pause ) {
+                        progressLabel.setText(progressTime);
+                    }
+                });
+
+                // Aguarde um curto período de tempo antes de atualizar novamente
+                try {
+                    Thread.sleep(1000); // Atualiza a cada segundo (1000 milissegundos)
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        progressThread.start();
+
+
+
         GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
         Panel playback_control = new Panel( gridLayout );
@@ -468,12 +512,23 @@ public class Apolo extends JFrame{
 
 
         JPanel mainPanel = new JPanel(null);
-        playback_control.setBounds(115, 11, 230, 48);
-        label.setBounds(0, 0, 400, 70);
+        playback_control.setBounds(115, 21, 230, 48);//+10
+        label.setBounds(0, 10, 400, 70);
+        progressBar.setBounds(0, 2, 534, 5);
+
+        durationLabel.setBounds(500, 10, 40, 10);
+        durationLabel.setForeground(Color.BLACK);
+
+        progressLabel.setBounds( 0, 10, 40, 10 );
+        progressLabel.setForeground(Color.BLACK);
+
         mainPanel.setBackground( new Color( 40, 40, 40) );
         mainPanel.add(playback_control);
         mainPanel.add(label);
-        mainPanel.setBounds(350, 350, 400, 70);
+        mainPanel.add( progressBar );
+        mainPanel.add( durationLabel );
+        mainPanel.add( progressLabel );
+        mainPanel.setBounds(283, 335, 534, 90);
         add(mainPanel);
 
 

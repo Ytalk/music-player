@@ -120,11 +120,7 @@ public class PlaylistManager implements Serializable {
                 if (!playlists.isEmpty()) {
                     mainList.setSelectedIndex(0);
                     String firstPlaylist = mainList.getSelectedValue();
-                    Playlist firstPlaylistInstance = playlists.get(firstPlaylist);
                     playlists_cardlayout.show(playlists_panel, firstPlaylist);
-                } else {
-                    // Não há mais playlists, volte para o playlists_panel vazio
-                    playlists_cardlayout.show(playlists_panel, "vazio");
                 }
 
                 pm.saveToFile(pm);

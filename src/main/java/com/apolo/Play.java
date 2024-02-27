@@ -10,8 +10,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.File;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.images.Artwork;
+import java.io.IOException;
 
 
 /**
@@ -25,6 +37,15 @@ public class Play implements Runnable {
     private AdvancedPlayer player; // The player responsible for audio playback
     private File file; // The audio file to be played
     private int currentFrame = 0; // Current frame position within the audio file
+    private JProgressBar progressBar; // Adiciona uma barra de progresso
+    private double duration;
+    private String formatDuration;
+    private String progress;
+
+    public Play(JProgressBar progressBar) {//mudar nome da classe
+        this.progressBar = progressBar;
+    }
+
 
     /**
      * Sets the audio file to be played by the music player.
@@ -45,6 +66,8 @@ public class Play implements Runnable {
         if (!file.exists()) {
             throw new musicException("Song not found: " + filePath, "Path does not exist");
         }
+
+        duration = getMP3Duration(filePath);
 
         try {
             // Create a FileInputStream and wrap it in a BufferedInputStream
@@ -106,12 +129,12 @@ public class Play implements Runnable {
             player.setPlayBackListener(new PlaybackListener() {
                 @Override
                 public void playbackFinished(PlaybackEvent evt) {
-                    System.out.println("Playback complete!");
-                    player.close();
-                    setFrame();
+                System.out.println("Playback complete!");
+                player.close();
+                setFrame();
 
-                    playing = false;
-                    fireStateChanged();
+                playing = false;
+                fireStateChanged();
                 }
             });
 
@@ -185,6 +208,7 @@ public class Play implements Runnable {
                 try {
                     Thread.sleep(25);
                     currentFrame++;
+                    updateProgressBar();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -198,5 +222,50 @@ public class Play implements Runnable {
      */
     public void setFrame() {
         currentFrame = 0;
+        progressBar.setValue(0);
     }
+
+    private void updateProgressBar() {
+        if (player != null) {
+            // Calcula o progresso atual da reprodução em segundos
+            double progressSeconds = (double) currentFrame * 0.025;
+
+            int minutes = (int) (progressSeconds / 60); // Calcula os minutos
+            int seconds = (int) (progressSeconds % 60); // Calcula os segundos restantes
+            progress = String.format("%02d:%02d", minutes, seconds); // Formata os minutos e segundos
+
+            // Calcula o progresso em relação à duração total
+            double progress = (progressSeconds / duration);
+
+            // Atualiza o valor da barra de progresso
+            progressBar.setValue((int) progress);
+        }
+    }
+
+    public String getProgress(){
+        return progress;
+    }
+
+    private double getMP3Duration(String filePath) {
+        try {
+            AudioFile audioFile = AudioFileIO.read(new File(filePath));
+            int trackLength = audioFile.getAudioHeader().getTrackLength(); // Duração da faixa em segundos
+
+            long milliseconds = trackLength * 1000; // Convertendo segundos para milissegundos
+            long minutes = milliseconds / (1000 * 60);
+            long seconds = (milliseconds / 1000) % 60;
+
+            formatDuration = String.format("%02d:%02d", minutes, seconds);
+
+            return minutes;
+        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
+            e.printStackTrace();
+        }
+        return -1; // Retorna -1 se houver algum erro
+    }
+
+    public String getFormatDuration() {
+        return formatDuration;
+    }
+
 }
