@@ -40,10 +40,11 @@ public class Play implements Runnable {
     private JProgressBar progressBar; // Adiciona uma barra de progresso
     private double duration;
     private String formatDuration;
-    private String progress;
+    private JLabel progressLabel;
 
-    public Play(JProgressBar progressBar) {//mudar nome da classe
+    public Play(JProgressBar progressBar, JLabel progressLabel) {//mudar nome da classe
         this.progressBar = progressBar;
+        this.progressLabel = progressLabel;
     }
 
 
@@ -232,18 +233,14 @@ public class Play implements Runnable {
 
             int minutes = (int) (progressSeconds / 60); // Calcula os minutos
             int seconds = (int) (progressSeconds % 60); // Calcula os segundos restantes
-            progress = String.format("%02d:%02d", minutes, seconds); // Formata os minutos e segundos
+            progressLabel.setText( String.format("%02d:%02d", minutes, seconds) ); // Formata os minutos e segundos
 
             // Calcula o progresso em relação à duração total
-            double progress = (progressSeconds / duration);
+            double progress = (progressSeconds / duration) * 1.51;
 
             // Atualiza o valor da barra de progresso
             progressBar.setValue((int) progress);
         }
-    }
-
-    public String getProgress(){
-        return progress;
     }
 
     private double getMP3Duration(String filePath) {

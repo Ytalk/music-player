@@ -25,7 +25,7 @@ public class Apolo extends JFrame{
     private JLabel durationLabel = new JLabel( "00:00" );
     private JLabel progressLabel = new JLabel( "00:00" );
 
-    private Play music = new Play( progressBar );
+    private Play music = new Play( progressBar, progressLabel );
     private boolean pause = true;
     private String music_path;
 
@@ -476,31 +476,6 @@ public class Apolo extends JFrame{
         label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
 
 
-        // Inicia a thread para atualizar o tempo de progresso
-        Thread progressThread = new Thread(() -> {
-            while (true) {
-                // Obtenha o tempo de progresso da música
-                String progressTime = music.getProgress();
-
-                // Atualize a label na interface gráfica com o tempo de progresso
-                SwingUtilities.invokeLater(() -> {
-                    if( !pause ) {
-                        progressLabel.setText(progressTime);
-                    }
-                });
-
-                // Aguarde um curto período de tempo antes de atualizar novamente
-                try {
-                    Thread.sleep(1000); // Atualiza a cada segundo (1000 milissegundos)
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        progressThread.start();
-
-
-
         GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
         Panel playback_control = new Panel( gridLayout );
@@ -512,14 +487,17 @@ public class Apolo extends JFrame{
 
 
         JPanel mainPanel = new JPanel(null);
-        playback_control.setBounds(115, 21, 230, 48);//+10
-        label.setBounds(0, 10, 400, 70);
-        progressBar.setBounds(0, 2, 534, 5);
+        playback_control.setBounds(180, 28, 230, 48);//+10
+        label.setBounds(65, 17, 400, 70);
 
-        durationLabel.setBounds(500, 10, 40, 10);
+        progressBar.setBounds(0, 5, 534, 5);
+        progressBar.setForeground( new Color(129, 13, 175) );
+        progressBar.setBackground(Color.WHITE);
+
+        durationLabel.setBounds(503, 15, 40, 10);
         durationLabel.setForeground(Color.BLACK);
 
-        progressLabel.setBounds( 0, 10, 40, 10 );
+        progressLabel.setBounds( 0, 15, 40, 10 );
         progressLabel.setForeground(Color.BLACK);
 
         mainPanel.setBackground( new Color( 40, 40, 40) );
