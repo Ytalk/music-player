@@ -36,6 +36,9 @@ public class Play implements Runnable {
     private ChangeListener changeListener; // Listener for state change events
     private AdvancedPlayer player; // The player responsible for audio playback
     private File file; // The audio file to be played
+    private Thread frameCounterThread;
+
+
     private int currentFrame = 0; // Current frame position within the audio file
     private JProgressBar progressBar; // Adiciona uma barra de progresso
     private double duration;
@@ -157,10 +160,10 @@ public class Play implements Runnable {
     public void stop() {
         if (playing) {
             player.close();
-            System.out.println("Playback is over!");
-
             playing = false;
             fireStateChanged();
+
+            System.out.println("Playback is over!");
         }
     }
 
@@ -204,11 +207,11 @@ public class Play implements Runnable {
      * Starts a thread to count frames during playback.
      */
     private void startFrameCounter() {
-        Thread frameCounterThread = new Thread(() -> {
+        frameCounterThread = new Thread(() -> {
             while (playing) {
                 try {
-                    Thread.sleep(25);
-                    currentFrame++;
+                    Thread.sleep(1000);
+                    currentFrame = currentFrame + 40;
                     updateProgressBar();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -236,7 +239,7 @@ public class Play implements Runnable {
             progressLabel.setText( String.format("%02d:%02d", minutes, seconds) ); // Formata os minutos e segundos
 
             // Calcula o progresso em relação à duração total
-            double progress = (progressSeconds / duration) * 1.51;
+            double progress = (progressSeconds / duration) * 1.3;
 
             // Atualiza o valor da barra de progresso
             progressBar.setValue((int) progress);
@@ -264,5 +267,7 @@ public class Play implements Runnable {
     public String getFormatDuration() {
         return formatDuration;
     }
+
+
 
 }
