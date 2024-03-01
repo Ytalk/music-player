@@ -244,7 +244,7 @@ public class Apolo extends JFrame{
                         else{//new play
                             System.out.println(file_path);
                             music_path = file_path;
-                            music.setFrame();
+                            music.resetPlayback();
 
                             music.setMusic(music_path);
                             durationLabel.setText( music.getFormatDuration() );
@@ -312,7 +312,7 @@ public class Apolo extends JFrame{
                         selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//muda na JList para a música anterior
 
                         music_path = file_path;
-                        music.setFrame();
+                        music.resetPlayback();
                         pause = false;
 
                         music.setMusic(file_path);
@@ -325,7 +325,7 @@ public class Apolo extends JFrame{
                         System.out.println("Você já está na primeira música.");
                         String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        music.setFrame();
+                        music.resetPlayback();
                         pause = false;
                         music.setMusic(file_path);
                         musicThread = new Thread(music);
@@ -389,7 +389,7 @@ public class Apolo extends JFrame{
                         selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//muda na JList para a próxima música
 
                         music_path = file_path;
-                        music.setFrame();
+                        music.resetPlayback();
                         pause = false;
 
                         music.setMusic(file_path);
@@ -402,7 +402,7 @@ public class Apolo extends JFrame{
                         System.out.println("Não há mais músicas na lista.");
                         String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        music.setFrame();
+                        music.resetPlayback();
                         pause = false;
                         music.setMusic(file_path);
                         musicThread = new Thread(music);
@@ -446,12 +446,12 @@ public class Apolo extends JFrame{
                             next_button.doClick();
 
                         else if( current_repeat_state == RepeatState.REPEAT ) {
-                            music.setFrame();
+                            //music.setFrame();
                             play_button.doClick();
                         }
 
                         else if( current_repeat_state == RepeatState.REPEAT_ONCE ){
-                            music.setFrame();
+                            //music.setFrame();
                             if(counter_repeat_once < 1){//repeat once
                                 play_button.doClick();
                                 ++counter_repeat_once;
