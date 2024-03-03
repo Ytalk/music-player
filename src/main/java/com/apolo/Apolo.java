@@ -322,7 +322,7 @@ public class Apolo extends JFrame{
                         musicThread.start();
                     }
                     else {
-                        System.out.println("Você já está na primeira música.");
+                        System.out.println("You're already on the first song.");
                         String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
                         music.resetPlayback();
@@ -399,7 +399,7 @@ public class Apolo extends JFrame{
                         musicThread.start();
                     }
                     else {
-                        System.out.println("Não há mais músicas na lista.");
+                        System.out.println("There are no more songs in the playlist.");
                         String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
                         music.resetPlayback();
@@ -442,16 +442,15 @@ public class Apolo extends JFrame{
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
                     if(selectedPlaylist != null){
+
                         if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && current_repeat_state == RepeatState.INACTIVE )
                             next_button.doClick();
 
                         else if( current_repeat_state == RepeatState.REPEAT ) {
-                            //music.setFrame();
                             play_button.doClick();
                         }
 
                         else if( current_repeat_state == RepeatState.REPEAT_ONCE ){
-                            //music.setFrame();
                             if(counter_repeat_once < 1){//repeat once
                                 play_button.doClick();
                                 ++counter_repeat_once;
@@ -475,7 +474,6 @@ public class Apolo extends JFrame{
         JLabel label = new JLabel();
         label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
 
-
         GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
         Panel playback_control = new Panel( gridLayout );
@@ -485,20 +483,21 @@ public class Apolo extends JFrame{
         playback_control.add(next_button);
         playback_control.add(repeat_button);
 
-
         JPanel mainPanel = new JPanel(null);
         playback_control.setBounds(180, 28, 230, 48);//+10
         label.setBounds(65, 17, 400, 70);
+
 
         progressBar.setBounds(0, 5, 534, 5);
         progressBar.setForeground( new Color(129, 13, 175) );
         progressBar.setBackground(Color.WHITE);
 
         durationLabel.setBounds(503, 15, 40, 10);
-        durationLabel.setForeground(Color.BLACK);
+        durationLabel.setForeground(Color.WHITE);
 
         progressLabel.setBounds( 0, 15, 40, 10 );
-        progressLabel.setForeground(Color.BLACK);
+        progressLabel.setForeground(Color.WHITE);
+
 
         mainPanel.setBackground( new Color( 40, 40, 40) );
         mainPanel.add(playback_control);

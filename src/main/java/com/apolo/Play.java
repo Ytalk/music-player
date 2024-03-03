@@ -134,10 +134,10 @@ public class Play implements Runnable {
                 frameTimer.stop();
                 resetPlayback();
 
+                System.out.println("Playback complete!");
+
                 playing = false;
                 fireStateChanged();
-
-                System.out.println("Playback complete!");
                 }
             });
 
@@ -186,10 +186,10 @@ public class Play implements Runnable {
                     frameTimer.stop();
                     resetPlayback();
 
+                    System.out.println("Playback complete!");
+
                     playing = false;
                     fireStateChanged();
-
-                    System.out.println("Playback complete!");
                 }
             });
 
@@ -218,7 +218,7 @@ public class Play implements Runnable {
             progressLabel.setText( String.format("%02d:%02d", minutes, seconds) );
 
             //calcula o progresso em relação à duração total
-            double progress = (progressSeconds / duration) * 1.4;
+            double progress = (progressSeconds / duration) * 100;
             //atualiza o valor da barra de progresso
             progressBar.setValue((int) progress);
 
@@ -240,15 +240,13 @@ public class Play implements Runnable {
     private double getMP3Duration(String filePath) {
         try {
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            int trackLength = audioFile.getAudioHeader().getTrackLength(); // Duração da faixa em segundos
+            int trackLength = audioFile.getAudioHeader().getTrackLength();//duração da faixa em segundos
 
-            long milliseconds = trackLength * 1000; //converte segundos para milissegundos
-            long minutes = milliseconds / (1000 * 60);
-            long seconds = (milliseconds / 1000) % 60;
-
+            int minutes = (trackLength / 60);
+            int seconds = (trackLength % 60);
             formatDuration = String.format("%02d:%02d", minutes, seconds);
 
-            return minutes;
+            return trackLength;
         } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
             e.printStackTrace();
         }
