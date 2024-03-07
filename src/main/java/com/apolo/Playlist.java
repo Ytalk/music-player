@@ -1,12 +1,23 @@
 package com.apolo;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.BorderLayout;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
-import javax.swing.SwingConstants;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.BorderLayout;
+
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.DefaultListModel;
+import javax.swing.SwingConstants;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.BorderFactory;
 
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -17,7 +28,6 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.images.Artwork;
-import java.io.IOException;
 
 /**
  * The `Playlist` class represents a playlist containing a list of music files.
@@ -51,7 +61,7 @@ public class Playlist implements Serializable {
         listModel = new DefaultListModel<>();
         mp3pathlist = new JList<>();
         mp3pathlist.setModel(listModel);
-        mp3pathlist.setCellRenderer(new musicCellRenderer());
+        mp3pathlist.setCellRenderer(new ApoloTaggerListCellRenderer());
         mp3pathlist.setBackground(new Color(64, 64, 64));
         mp3pathlist_scroll = new JScrollPane(mp3pathlist);
         mp3pathlist_scroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -101,77 +111,57 @@ public class Playlist implements Serializable {
     /**
      * Custom cell renderer for displaying file names in the playlist.
      */
-    public class musicCellRenderer extends DefaultListCellRenderer implements Serializable {
+    public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer implements Serializable {
         private static final long serialVersionUID = 6L;
 
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
-            JPanel musicPanel = new JPanel(new BorderLayout());//panel for every JList row
+            JPanel musicPanel = new JPanel(new BorderLayout());
+            musicPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
+            musicPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
             if (value instanceof String) {
-                //obtain only the file name without path or extension
-                String fileName = new File((String) value).getName().replaceFirst("[.][^.]+$", "");
-
-                //get the album artwork
-                String filePath = (String) list.getModel().getElementAt(index);
-
-                //get the albumArt, title, and duration of the MP3 with JAudioTagger
+                String filePath = (String) value;
+                String fileName = new File(filePath).getName().replaceFirst("[.][^.]+$", "");
                 ImageIcon albumArt = getMP3AlbumArtwork(filePath);
                 String title = getMP3Title(filePath);
                 String duration = getMP3Duration(filePath);
 
+                JPanel infoPanel = new JPanel(new BorderLayout());
+                infoPanel.setBackground(musicPanel.getBackground());
 
-                //creates labels for MP3 information (title, duration and albumArt). and a panel to allocate this information.
-                JPanel infoPanel = new JPanel( new BorderLayout() );
-                infoPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
-
-                if( title != null && !(title.isEmpty()) ) {
-                    JLabel titleLabel = new JLabel(title);
-                    titleLabel.setForeground(Color.BLACK);
-                    infoPanel.add(titleLabel, BorderLayout.CENTER );
-                } else {
-                    JLabel fileNameLabel = new JLabel(fileName);
-                    fileNameLabel.setForeground(Color.BLACK);
-                    infoPanel.add( fileNameLabel, BorderLayout.CENTER );
-                }
+                JLabel titleLabel = new JLabel(title != null && !title.isEmpty() ? title : fileName);
+                titleLabel.setForeground(Color.BLACK);
+                infoPanel.add(titleLabel, BorderLayout.CENTER);
 
                 JLabel durationLabel = new JLabel(duration);
                 durationLabel.setForeground(Color.BLACK);
                 infoPanel.add(durationLabel, BorderLayout.EAST);
 
-
-                //add the album artwork and info panel to the main panel
                 if (albumArt != null) {
                     JLabel albumArtLabel = new JLabel(albumArt);
                     musicPanel.add(albumArtLabel, BorderLayout.WEST);
                 }
                 musicPanel.add(infoPanel, BorderLayout.CENTER);
             } else {
-                musicPanel.add(new JLabel(value.toString()), BorderLayout.CENTER);
+                JLabel label = new JLabel(value.toString());
+                label.setForeground(Color.BLACK);
+                musicPanel.add(label, BorderLayout.CENTER);
             }
 
-
-            // Customize the appearance based on selection and index
-            if (isSelected) {
-                musicPanel.setBackground(new Color(129, 13, 175));
-            } else {
-                musicPanel.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
-            }
-
-            // Configure as propriedades de exibição do JLabel
-            musicPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Adicione alguma margem ao redor do texto
-
+            musicPanel.setBackground(isSelected ? new Color(129, 13, 175) : musicPanel.getBackground());
             return musicPanel;
         }
 
-        private String getMP3Duration(String filePath) {
+
+    private String getMP3Duration(String filePath) {
             try {
                 AudioFile audioFile = AudioFileIO.read(new File(filePath));
                 int trackLength = audioFile.getAudioHeader().getTrackLength(); // Duração da faixa em segundos
-                long milliseconds = trackLength * 1000; // Convertendo segundos para milissegundos
-                long minutes = milliseconds / (1000 * 60);
-                long seconds = (milliseconds / 1000) % 60;
+
+                int minutes = trackLength / 60;
+                int seconds = trackLength % 60;
                 return String.format("%02d:%02d", minutes, seconds);
             } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
                 e.printStackTrace();
@@ -192,18 +182,6 @@ public class Playlist implements Serializable {
             return null;
         }
 
-        private String getMP3Artist(String filePath) {
-            try {
-                AudioFile audioFile = AudioFileIO.read(new File(filePath));
-                Tag tag = audioFile.getTag();
-                if (tag != null) {
-                    return tag.getFirst(FieldKey.ARTIST);
-                }
-            } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
 
         private ImageIcon getMP3AlbumArtwork(String filePath) {
             try {
@@ -214,9 +192,7 @@ public class Playlist implements Serializable {
                     if (artwork != null) {
                         byte[] imageData = artwork.getBinaryData();
                         if (imageData != null) {
-                            ImageIcon icon = new ImageIcon(imageData);
-                            Image scaledImage = icon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-                            return new ImageIcon(scaledImage);
+                            return new ImageIcon(new ImageIcon(imageData).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
                         }
                     }
                 }

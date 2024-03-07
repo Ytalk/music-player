@@ -25,10 +25,10 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 
 
 /**
- * The `Play` class represents a music player that can play audio files using the JavaLayer library.
+ * The `PlaybackManager` class represents a music player that can play audio files using the JavaLayer library.
  * It implements the `Runnable` interface to enable multithreading for playback.
  */
-public class Play implements Runnable {
+public class PlaybackManager implements Runnable {
 
     private boolean playing = false; // Flag to indicate whether the player is currently playing
     private ChangeListener changeListener; // Listener for state change events
@@ -42,7 +42,7 @@ public class Play implements Runnable {
     private String formatDuration;
     private JLabel progressLabel;
 
-    public Play(JProgressBar progressBar, JLabel progressLabel) {//mudar nome da classe
+    public PlaybackManager(JProgressBar progressBar, JLabel progressLabel) {
         this.progressBar = progressBar;
         this.progressLabel = progressLabel;
     }
@@ -146,7 +146,7 @@ public class Play implements Runnable {
             playing = true; //mark as playing
             fireStateChanged(); //notify listeners of state change
 
-            startProgressWatcher(); //start counting frames
+            startProgressWatcher();
             player.play(); //start playback
         } catch (JavaLayerException e) {
             e.printStackTrace();
@@ -156,7 +156,7 @@ public class Play implements Runnable {
     /**
      * Stops playback of the audio file.
      */
-    public void stop() {
+    public void pausePlayblack() {
         if (playing) {
             player.close();
             frameTimer.stop();
@@ -242,21 +242,19 @@ public class Play implements Runnable {
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
             int trackLength = audioFile.getAudioHeader().getTrackLength();//duração da faixa em segundos
 
-            int minutes = (trackLength / 60);
-            int seconds = (trackLength % 60);
+            int minutes = trackLength / 60;
+            int seconds = trackLength % 60;
             formatDuration = String.format("%02d:%02d", minutes, seconds);
 
             return trackLength;
         } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
             e.printStackTrace();
         }
-        return -1;
+        return 0;
     }
 
     public String getFormatDuration() {
         return formatDuration;
     }
-
-
 
 }

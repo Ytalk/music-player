@@ -26,9 +26,9 @@ public class PlaylistManager implements Serializable {
     private static final long serialVersionUID = 6L;
 
     private JList<String> mainList; // JList displaying the main list of playlists
-    private JPanel playlists_panel; // Panel containing playlists
-    private Panel mainList_panel; // Panel containing the main list of playlists
-    private CardLayout playlists_cardlayout; // Card layout for managing playlists
+    private JPanel playlistPanel; // Panel containing playlists
+    private Panel mainListPanel; // Panel containing the main list of playlists
+    private CardLayout playlistCardlayout; // Card layout for managing playlists
     private Map<String, Playlist> playlists; // Map to store playlist instances
     private PlaylistManager manager; // Instance of the playlist manager
     private JScrollPane scrollPlaylists; // Scroll pane for the main list of playlists
@@ -41,27 +41,27 @@ public class PlaylistManager implements Serializable {
         playlists = new HashMap<>();
 
         // Initialize card layout for playlists
-        playlists_cardlayout = new CardLayout();
-        playlists_panel = new JPanel(playlists_cardlayout);
-        playlists_panel.setBackground(Color.BLACK);
+        playlistCardlayout = new CardLayout();
+        playlistPanel = new JPanel(playlistCardlayout);
+        playlistPanel.setBackground(Color.BLACK);
 
         // Initialize main list of playlists
         mainList = new JList<>();
         mainList.setBackground(new Color(64, 64, 64));
-        mainList.setCellRenderer(new PurpleListRenderer());
+        mainList.setCellRenderer(new ApoloListCellRenderer());
         scrollPlaylists = new JScrollPane(mainList);
         scrollPlaylists.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        JLabel mainList_label = new JLabel("Playlists");
-        mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
-        mainList_label.setVerticalAlignment(SwingConstants.CENTER);
-        mainList_label.setFont(new Font("Arial", Font.BOLD, 20));
-        mainList_label.setForeground(Color.WHITE);
+        JLabel mainListLabel = new JLabel("Playlists");
+        mainListLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mainListLabel.setVerticalAlignment(SwingConstants.CENTER);
+        mainListLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        mainListLabel.setForeground(Color.WHITE);
 
-        mainList_panel = new Panel(new BorderLayout());
-        mainList_panel.setBackground(Color.BLACK);
-        mainList_panel.add(mainList_label, BorderLayout.NORTH);
-        mainList_panel.add(scrollPlaylists, BorderLayout.CENTER);
+        mainListPanel = new Panel(new BorderLayout());
+        mainListPanel.setBackground(Color.BLACK);
+        mainListPanel.add(mainListLabel, BorderLayout.NORTH);
+        mainListPanel.add(scrollPlaylists, BorderLayout.CENTER);
     }
 
     /**
@@ -91,7 +91,7 @@ public class PlaylistManager implements Serializable {
 
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-                playlists_panel.add(playlist.getPlaylist(), playlistName);
+                playlistPanel.add(playlist.getPlaylist(), playlistName);
                 return;
             }
         }
@@ -113,21 +113,21 @@ public class PlaylistManager implements Serializable {
         if (playlist != null) {
             int confirm_playlist_del = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + playlist_name + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
             if (confirm_playlist_del == JOptionPane.YES_OPTION) {
-                playlists_panel.remove(playlist.getPlaylist());
+                playlistPanel.remove(playlist.getPlaylist());
                 playlists.remove(playlist_name);
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
 
                 if (!playlists.isEmpty()) {
                     mainList.setSelectedIndex(0);
                     String firstPlaylist = mainList.getSelectedValue();
-                    playlists_cardlayout.show(playlists_panel, firstPlaylist);
+                    playlistCardlayout.show(playlistPanel, firstPlaylist);
                 }
 
                 pm.saveToFile(pm);
             }
         }
         else{
-            throw new musicException("Select a playlist before deleting!", "no playlist selected");
+            throw new musicException("Select a playlist before deleting!", "Null Playlist");
         }
     }
 
@@ -144,16 +144,16 @@ public class PlaylistManager implements Serializable {
      * Retrieves the panel containing the playlist manager UI components.
      * @return The panel containing the main list of playlists.
      */
-    public Panel getPlaylistManagerPanel() {
-        return mainList_panel;
+    public Panel getMainListPanel() {
+        return mainListPanel;
     }
 
     /**
      * Retrieves the panel containing the playlists.
      * @return The panel containing the playlists.
      */
-    public JPanel getPlaylistCard() {
-        return playlists_panel;
+    public JPanel getPlaylistPanel() {
+        return playlistPanel;
     }
 
     /**
@@ -168,8 +168,8 @@ public class PlaylistManager implements Serializable {
      * Retrieves the card layout for managing playlists.
      * @return The CardLayout object used for managing playlists.
      */
-    public CardLayout getPlaylistsCardLayout() {
-        return playlists_cardlayout;
+    public CardLayout getPlaylistCardLayout() {
+        return playlistCardlayout;
     }
 
 
@@ -180,7 +180,7 @@ public class PlaylistManager implements Serializable {
     public void saveToFile(PlaylistManager pm){
         manager = pm;
 
-        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
+        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src\\main\\java\\com\\apolo\\playlists.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
             writer.writeObject(manager);//escreve no arquivo
         }
         catch(IOException e){
@@ -193,7 +193,7 @@ public class PlaylistManager implements Serializable {
      * Loads the saved state of the PlaylistManager from a file.
      */
     public void loadFile(){
-        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OIS para ler objetos do arquivo
+        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlists.byte"))){//cria OIS para ler objetos do arquivo
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
         }
         catch (FileNotFoundException e){
@@ -213,25 +213,23 @@ public class PlaylistManager implements Serializable {
     }
 
 
-    public class PurpleListRenderer extends DefaultListCellRenderer  implements Serializable{
+    public class ApoloListCellRenderer extends DefaultListCellRenderer  implements Serializable{
         private static final long serialVersionUID = 6L;
 
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
             if (isSelected) {
-                //item selecionado
-                renderer.setBackground(new Color(129, 13, 175));
-                renderer.setForeground(Color.BLACK);
+                setBackground(new Color(129, 13, 175));
+                setForeground(Color.BLACK);
             }
             else {
-                //não selecionado
-                renderer.setForeground(Color.BLACK);
-                renderer.setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
+                setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
+                setForeground(Color.BLACK);
             }
 
-            return renderer;
+            return this;
         }
     }
 
