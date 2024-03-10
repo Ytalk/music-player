@@ -1,8 +1,8 @@
 run:
-	./mvnw.cmd exec:run
+	./mvnw exec:java
 
 compile:
-	./mvnw clean install
+	./mvnw compile
 
 lpermission:
 	chmod +x mvnw

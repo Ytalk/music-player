@@ -1,22 +1,40 @@
 package com.apolo;
 
-import java.awt.*;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.CardLayout;
+import java.awt.GridLayout;
+import java.awt.Panel;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.io.File;
+
+import javax.swing.JPanel;
+import javax.swing.ImageIcon;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 
 
 public class Apolo extends JFrame{
 
-    Thread musicThread = new Thread();
 
+    private PlaylistManager playlist_manager;
     private Map<String, Playlist> playlists;//armazena instâncias de Playlist
+    private JPanel playlistPanel;
     private JList<String> mainList;
     private Playlist playlist;
     private CardLayout cardLayout;
@@ -26,6 +44,8 @@ public class Apolo extends JFrame{
     private JLabel progressLabel = new JLabel( "00:00" );
 
     private PlaybackManager music = new PlaybackManager( progressBar, progressLabel );
+    Thread musicThread = new Thread(music);
+
     private boolean pause = true;
     private String music_path;
 
@@ -38,6 +58,7 @@ public class Apolo extends JFrame{
     private ImageIcon deleteIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
 
     public class importUserPlaylists{
+        private boolean novo = false;
 
         public PlaylistManager getPlaylists() {
             PlaylistManager playlist_manager = new PlaylistManager();
@@ -45,21 +66,76 @@ public class Apolo extends JFrame{
             if (playlist_manager.getManager() != null) {
                 playlist_manager = playlist_manager.getManager();
             }
-
+            else{
+                novo = true;
+            }
             return playlist_manager;
         }
+
+
+        public void getSongs(){
+            if(novo) {
+                //obtém a instância do sistema de arquivos
+                FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+
+                //obtém o diretório da pasta de músicas padrão
+                File musicDirectoryPT = new File(System.getProperty("user.home") + "/Músicas");
+                File musicDirectory = new File(System.getProperty("user.home") + "/Music");
+
+                if ( musicDirectory.exists() || musicDirectoryPT.exists() ) {
+                    System.out.println("Pasta de músicas padrão: " + musicDirectory.getAbsolutePath());
+
+                    //lista todos os arquivos na pasta de músicas
+                    File[] files = musicDirectory.listFiles();
+
+                    //armazena os arquivos .mp3
+                    List<File> mp3Files = new ArrayList<>();
+
+                    //verifica cada arquivo na pasta
+                    if (files != null) {
+                        for (File file : files) {
+                            //verifica se é um arquivo .mp3
+                            if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
+                                mp3Files.add(file);
+                            }
+                        }
+                    }
+
+                    if (!mp3Files.isEmpty()) {
+                        Playlist playlist = new Playlist("Songs");
+                        playlists.put("Songs", playlist);
+                        mainList.setListData(playlists.keySet().toArray(new String[0]));
+                        playlistPanel.add(playlist.getPlaylist(), "Songs");
+
+                        for (File mp3File : mp3Files) {
+                            playlist.addMusic(mp3File.getAbsolutePath());
+                        }
+                    }
+                    else {
+                        System.out.println("Nenhum arquivo .mp3 encontrado na pasta de músicas.");
+                    }
+
+                }
+                else {
+                    System.out.println("Pasta de músicas padrão não encontrada.");
+                }
+            }
+        }
+
 
     }
 
     public Apolo(){
 
-        PlaylistManager playlist_manager = new importUserPlaylists().getPlaylists();
+        importUserPlaylists importUser = new importUserPlaylists();
+        playlist_manager = importUser.getPlaylists();
 
         mainList = playlist_manager.getMainList();
         playlists = playlist_manager.getMap();
         cardLayout = playlist_manager.getPlaylistCardLayout();
+        playlistPanel = playlist_manager.getPlaylistPanel();
 
-
+        importUser.getSongs();
 
         //abrir ou deletar musica
         JButton addMusicButton = new JButton(addMusicIcon);
@@ -132,8 +208,8 @@ public class Apolo extends JFrame{
 
 
         //adiciona a lista principal e as playlists (card) ao JFrame
-        playlist_manager.getPlaylistPanel().setBounds(283, 20, 534, 310);//posição e tamanho do card de uma playlist
-        add(playlist_manager.getPlaylistPanel());
+        playlistPanel.setBounds(283, 20, 534, 310);//posição e tamanho do card de uma playlist
+        add(playlistPanel);
 
 
 
@@ -149,8 +225,8 @@ public class Apolo extends JFrame{
             playlist_manager.createPlaylist();
 
             if(mainList.getModel().getSize() == 1) {
-                playlist_manager.getPlaylistPanel().revalidate();
-                playlist_manager.getPlaylistPanel().repaint();
+                playlistPanel.revalidate();
+                playlistPanel.repaint();
                 addMusicButton.repaint();
                 delMusicButton.repaint();
             }
@@ -186,7 +262,7 @@ public class Apolo extends JFrame{
         //adicione um ouvinte para alternar entre playlists
         mainList.addListSelectionListener(e -> {
             String selectedPlaylist = mainList.getSelectedValue();
-            cardLayout.show(playlist_manager.getPlaylistPanel(), selectedPlaylist);
+            cardLayout.show(playlistPanel, selectedPlaylist);
             addMusicButton.repaint();
             delMusicButton.repaint();
         });
@@ -418,21 +494,6 @@ public class Apolo extends JFrame{
         });
 
 
-
-        repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 23, 23) );
-        repeat_button.setBorder(new EmptyBorder(0, 0, 0, 0));
-        repeat_button.setFocusPainted(false);
-        repeat_button.setContentAreaFilled(false);
-        repeat_button.setBackground(new Color(64, 64, 64));
-        add(repeat_button);
-
-        repeat_button.addActionListener(e -> {
-            toggleRepeatState();
-            updateButtonIcon();
-        });
-
-
-
         music.addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
             if(music.isPlaying()){
                 play_button.setIcon( getIcon("/icons/48_circle_pause_icon.png", 43, 43) );
@@ -473,48 +534,55 @@ public class Apolo extends JFrame{
         });
 
 
-        JPanel mainPanel = new JPanel(null);
-        mainPanel.setBackground( new Color( 40, 40, 40) );
-        mainPanel.setBounds(283, 335, 534, 90);
-        add(mainPanel);
+        repeat_button = new JButton( getIcon("/icons/repeat-song-512.png", 23, 23) );
+        repeat_button.setBorder(new EmptyBorder(0, 0, 0, 0));
+        repeat_button.setFocusPainted(false);
+        repeat_button.setContentAreaFilled(false);
+        repeat_button.setBackground(new Color(64, 64, 64));
+        add(repeat_button);
+
+        repeat_button.addActionListener(e -> {
+            toggleRepeatState();
+            updateButtonIcon();
+        });
+
+
+        JPanel playbackPanel = new JPanel(null);
+        playbackPanel.setBackground( new Color( 40, 40, 40) );
+        playbackPanel.setBounds(283, 335, 534, 90);
+        add(playbackPanel);
 
 
         GridLayout gridLayout = new GridLayout(1, 4);
         gridLayout.setHgap(10);
-        Panel playback_control = new Panel( gridLayout );
-        playback_control.setBackground(new Color(64, 64, 64));
-        playback_control.add(previous_button);
-        playback_control.add(play_button);
-        playback_control.add(next_button);
-        playback_control.add(repeat_button);
-        playback_control.setBounds(180, 28, 230, 48);//+10
-        mainPanel.add(playback_control);
+        Panel playbackControl = new Panel( gridLayout );
+        playbackControl.setBackground(new Color(64, 64, 64));
+        playbackControl.add(previous_button);
+        playbackControl.add(play_button);
+        playbackControl.add(next_button);
+        playbackControl.add(repeat_button);
+        playbackControl.setBounds(180, 28, 230, 48);//+10
+        playbackPanel.add(playbackControl);
 
 
-        JLabel label = new JLabel();
-        label.setIcon( getIcon("/icons/playback-control.png", 400, 70) );
-        label.setBounds(65, 17, 400, 70);
-        mainPanel.add(label);
+        JLabel playbackControlBackground = new JLabel( getIcon("/icons/playback-control.png", 400, 70) );
+        playbackControlBackground.setBounds(65, 17, 400, 70);
+        playbackPanel.add(playbackControlBackground);
 
 
-
-
-
-
-        progressBar.setBounds(0, 5, 534, 10);
+        progressBar.setBounds(0, 5, 534, 5);
         progressBar.setForeground( new Color(129, 13, 175) );
         progressBar.setBackground(Color.WHITE);
-        progressBar.setStringPainted(true);
-        progressBar.setFont( new Font("Arial", Font.BOLD, 9) );
-        mainPanel.add( progressBar );
+        progressBar.setStringPainted(false);
+        playbackPanel.add( progressBar );
 
         durationLabel.setBounds(503, 15, 40, 10);
         durationLabel.setForeground(Color.WHITE);
-        mainPanel.add( durationLabel );
+        playbackPanel.add( durationLabel );
 
         progressLabel.setBounds( 0, 15, 40, 10 );
         progressLabel.setForeground(Color.WHITE);
-        mainPanel.add( progressLabel );
+        playbackPanel.add( progressLabel );
 
 
         //DETALHES DO FRAME

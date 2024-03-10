@@ -117,7 +117,7 @@ public class PlaylistManager implements Serializable {
                 playlists.remove(playlist_name);
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-                if (!playlists.isEmpty()) {
+                if (!playlists.isEmpty()) {//isso aqui está quase inutil, atualizar del e creat playlist
                     mainList.setSelectedIndex(0);
                     String firstPlaylist = mainList.getSelectedValue();
                     playlistCardlayout.show(playlistPanel, firstPlaylist);
@@ -180,7 +180,7 @@ public class PlaylistManager implements Serializable {
     public void saveToFile(PlaylistManager pm){
         manager = pm;
 
-        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src\\main\\java\\com\\apolo\\playlists.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
+        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src/main/java/com/apolo/playlists.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
             writer.writeObject(manager);//escreve no arquivo
         }
         catch(IOException e){
@@ -193,7 +193,7 @@ public class PlaylistManager implements Serializable {
      * Loads the saved state of the PlaylistManager from a file.
      */
     public void loadFile(){
-        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlists.byte"))){//cria OIS para ler objetos do arquivo
+        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src/main/java/com/apolo/playlists.byte"))){//cria OIS para ler objetos do arquivo
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
         }
         catch (FileNotFoundException e){
