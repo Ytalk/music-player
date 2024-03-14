@@ -54,8 +54,8 @@ public class Apolo extends JFrame{
     private JButton repeat_button;
     private int counter_repeat_once = 0;
 
-    private ImageIcon addMusicIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
-    private ImageIcon deleteIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
+    private ImageIcon addIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
+    private ImageIcon delIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
 
     public class importUserPlaylists{
         private boolean novo = false;
@@ -75,9 +75,6 @@ public class Apolo extends JFrame{
 
         public void getSongs(){
             if(novo) {
-                //obtém a instância do sistema de arquivos
-                FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-
                 //obtém o diretório da pasta de músicas padrão
                 File musicDirectoryPT = new File(System.getProperty("user.home") + "/Músicas");
                 File musicDirectory = new File(System.getProperty("user.home") + "/Music");
@@ -85,7 +82,7 @@ public class Apolo extends JFrame{
                 if ( musicDirectory.exists() || musicDirectoryPT.exists() ) {
                     System.out.println("Pasta de músicas padrão: " + musicDirectory.getAbsolutePath());
 
-                    //lista todos os arquivos na pasta de músicas
+                    //todos os arquivos na pasta de músicas
                     File[] files = musicDirectory.listFiles();
 
                     //armazena os arquivos .mp3
@@ -108,7 +105,7 @@ public class Apolo extends JFrame{
                         playlistPanel.add(playlist.getPlaylist(), "Songs");
 
                         for (File mp3File : mp3Files) {
-                            playlist.addMusic(mp3File.getAbsolutePath());
+                            playlist.getListModel().addElement(mp3File.getAbsolutePath());
                         }
                     }
                     else {
@@ -138,7 +135,7 @@ public class Apolo extends JFrame{
         importUser.getSongs();
 
         //abrir ou deletar musica
-        JButton addMusicButton = new JButton(addMusicIcon);
+        JButton addMusicButton = new JButton(addIcon);
         addMusicButton.setBackground(Color.BLACK);
         addMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         addMusicButton.setBounds(758, 22, 20, 20);
@@ -146,39 +143,38 @@ public class Apolo extends JFrame{
         add(addMusicButton);
 
         addMusicButton.addActionListener(e -> {
-
             try {
-                String selectedPlaylist = mainList.getSelectedValue();
+                String selectedPlaylistName = mainList.getSelectedValue();
 
-                if (selectedPlaylist == null) {
+                if (selectedPlaylistName == null) {
                     throw new musicException("Select a playlist before adding a song!", "Null Playlist");
-                }
-                else {
+                } else {
                     JFileChooser fileChooser = new JFileChooser();
-                    fileChooser.setDialogTitle("Specify a file to open");
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos MP3", "mp3");
+                    fileChooser.setMultiSelectionEnabled(true);
+                    fileChooser.setDialogTitle("Specify files to add (press Ctrl for multi-selection)");
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3 Files", "mp3");
                     fileChooser.setFileFilter(filter);
 
                     int result = fileChooser.showOpenDialog(null);
-
                     if (result == JFileChooser.APPROVE_OPTION) {
-                        File selectedFile = fileChooser.getSelectedFile();
-                        String filePath = selectedFile.getAbsolutePath();
+                        File[] selectedFiles = fileChooser.getSelectedFiles();
+                        playlist = playlists.get(selectedPlaylistName);
 
-                        playlist = playlists.get(selectedPlaylist);
-                        playlist.addMusic(filePath);
+                        for (File selectedFile : selectedFiles) {
+                            playlist.getListModel().addElement( selectedFile.getAbsolutePath() );
+                        }
+
                         playlist_manager.saveToFile(playlist_manager);
                     }
                 }
 
-            } catch (musicException ex){
-               ex.showMessage();
+            } catch (musicException ex) {
+                ex.showMessage();
             }
-
         });
 
 
-        JButton delMusicButton = new JButton(deleteIcon);
+        JButton delMusicButton = new JButton(delIcon);
         delMusicButton.setBounds(320, 27, 20, 10);// posição e tamanho
         delMusicButton.setBackground(Color.BLACK);
         delMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -186,17 +182,22 @@ public class Apolo extends JFrame{
         add(delMusicButton);
 
         delMusicButton.addActionListener(e -> {
-            String selectedPlaylist = mainList.getSelectedValue();
+            String selectedPlaylistName = mainList.getSelectedValue();
 
             try {
-                if (selectedPlaylist == null) {
+                if (selectedPlaylistName == null) {
                     throw new musicException("Select a playlist before deleting a song!", "Null Playlist");
                 }
 
-                int confirm_playlist_del = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
-                if (confirm_playlist_del == JOptionPane.YES_OPTION) {
-                    playlist = playlists.get(selectedPlaylist);
-                    playlist.removeSelectedMusic();
+                playlist = playlists.get(selectedPlaylistName);
+                int selectedMusicPathIndex = playlist.getMp3List().getSelectedIndex();
+                if( selectedMusicPathIndex == -1 ){
+                    throw new musicException("Select a song first!", "Null Music");
+                }
+
+                int confirmSongDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Song Deletion", JOptionPane.YES_NO_OPTION);
+                if (confirmSongDel == JOptionPane.YES_OPTION) {
+                    playlist.getListModel().remove(selectedMusicPathIndex);
                     playlist_manager.saveToFile(playlist_manager);
                 }
             }
@@ -214,7 +215,7 @@ public class Apolo extends JFrame{
 
 
         //CRIAR OU DELETAR PLAYLIST
-        JButton createPlaylistButton = new JButton(addMusicIcon);
+        JButton createPlaylistButton = new JButton(addIcon);
         createPlaylistButton.setBackground(Color.BLACK);
         createPlaylistButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         createPlaylistButton.setBounds(218, 22, 20, 20);
@@ -226,7 +227,6 @@ public class Apolo extends JFrame{
 
             if(mainList.getModel().getSize() == 1) {
                 playlistPanel.revalidate();
-                playlistPanel.repaint();
                 addMusicButton.repaint();
                 delMusicButton.repaint();
             }
@@ -234,7 +234,7 @@ public class Apolo extends JFrame{
         });
 
 
-        JButton delete_playlist_button = new JButton(deleteIcon);
+        JButton delete_playlist_button = new JButton(delIcon);
         delete_playlist_button.setBounds(45, 27, 20, 10);
         delete_playlist_button.setBackground(Color.BLACK);
         delete_playlist_button.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -244,8 +244,6 @@ public class Apolo extends JFrame{
         delete_playlist_button.addActionListener(e -> {
             try {
                 playlist_manager.deletePlaylist(playlist_manager);
-                addMusicButton.repaint();
-                delMusicButton.repaint();
             }
             catch (musicException ex){
                 ex.showMessage();

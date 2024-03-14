@@ -82,13 +82,9 @@ public class Playlist implements Serializable {
         return playlist;
     }
 
-    /**
-     * Adds a music file to the playlist.
-     *
-     * @param path The path of the music file to be added.
-     */
-    public void addMusic(String path) {
-        listModel.addElement(path);
+
+    public DefaultListModel getListModel(){
+        return listModel;
     }
 
     /**
@@ -100,13 +96,6 @@ public class Playlist implements Serializable {
         return mp3pathlist;
     }
 
-    /**
-     * Removes the selected music file from the playlist.
-     */
-    public void removeSelectedMusic() {
-        int selectedIndex = mp3pathlist.getSelectedIndex();
-        listModel.remove(selectedIndex);
-    }
 
     /**
      * Custom cell renderer for displaying file names in the playlist.

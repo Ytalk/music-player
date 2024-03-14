@@ -71,7 +71,6 @@ public class PlaylistManager implements Serializable {
      */
     public void createPlaylist() {
         String playlistName;
-
         while (true) {
             playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
 
@@ -79,10 +78,10 @@ public class PlaylistManager implements Serializable {
                 break;
             }
 
+            playlistName = playlistName.trim();
+
             if (playlistName.length() < 1 || playlistName.length() > 20) {
                 JOptionPane.showMessageDialog(null, "Playlist name must be between 1 and 20 characters.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
-            } else if (playlistName.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Playlist name cannot be empty or consist only of whitespace.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
             } else if (playlists.containsKey(playlistName)) {
                 JOptionPane.showMessageDialog(null, "Playlist with this name already exists. Please choose a different name.", "Duplicate Name", JOptionPane.ERROR_MESSAGE);
             } else {
@@ -95,7 +94,6 @@ public class PlaylistManager implements Serializable {
                 return;
             }
         }
-
         return;
     }
 
@@ -107,20 +105,19 @@ public class PlaylistManager implements Serializable {
      * @throws musicException If no playlist is selected for deletion.
      */
     public void deletePlaylist(PlaylistManager pm) throws musicException{
-        String playlist_name = mainList.getSelectedValue();
-        Playlist playlist = playlists.get(playlist_name);
+        String selectedPlaylistName = mainList.getSelectedValue();
+        Playlist playlist = playlists.get(selectedPlaylistName);
 
         if (playlist != null) {
-            int confirm_playlist_del = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + playlist_name + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
-            if (confirm_playlist_del == JOptionPane.YES_OPTION) {
-                playlistPanel.remove(playlist.getPlaylist());
-                playlists.remove(playlist_name);
+            int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
+            if (confirmPlaylistDel == JOptionPane.YES_OPTION) {
+                playlists.remove(selectedPlaylistName);
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-                if (!playlists.isEmpty()) {//isso aqui está quase inutil, atualizar del e creat playlist
+                if (!playlists.isEmpty()) {
                     mainList.setSelectedIndex(0);
-                    String firstPlaylist = mainList.getSelectedValue();
-                    playlistCardlayout.show(playlistPanel, firstPlaylist);
+                } else{
+                    playlistPanel.remove(playlist.getPlaylist());
                 }
 
                 pm.saveToFile(pm);
