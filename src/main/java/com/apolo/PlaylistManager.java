@@ -15,169 +15,110 @@ import java.io.ObjectInputStream;
 import java.io.ObjectInputValidation;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 
-/**
- * The `PlaylistManager` class manages playlists in the music player application.
- * It provides functionality to create, delete, and load playlists, as well as access
- * the main list of playlists and the panel containing playlist information.
- */
-public class PlaylistManager implements Serializable {
+public class PlaylistManager implements Serializable{
 
     private static final long serialVersionUID = 6L;
+    private JList<String> mainList;//jlist com str para card
+    private JPanel playlists_panel;//card
+    private Panel mainList_panel;//panel playlist manager
+    private CardLayout cardLayout;
+    private Map<String, Playlist> playlists;  //armazena instâncias de Playlist
+    private PlaylistManager manager;
 
-    private JList<String> mainList; // JList displaying the main list of playlists
-    private JPanel playlistPanel; // Panel containing playlists
-    private Panel mainListPanel; // Panel containing the main list of playlists
-    private CardLayout playlistCardlayout; // Card layout for managing playlists
-    private Map<String, Playlist> playlists; // Map to store playlist instances
-    private PlaylistManager manager; // Instance of the playlist manager
-    private JScrollPane scrollPlaylists; // Scroll pane for the main list of playlists
 
-    /**
-     * Constructs a new PlaylistManager object.
-     * Initializes data structures and UI components for managing playlists.
-     */
     public PlaylistManager() {
         playlists = new HashMap<>();
 
-        // Initialize card layout for playlists
-        playlistCardlayout = new CardLayout();
-        playlistPanel = new JPanel(playlistCardlayout);
-        playlistPanel.setBackground(Color.BLACK);
+        //CARD
+        playlists_panel = new JPanel();
+        cardLayout = new CardLayout();
+        playlists_panel.setLayout(cardLayout);
+        playlists_panel.setBackground(new Color( 129, 13, 175));
 
-        // Initialize main list of playlists
-        mainList = new JList<>();
+
+        //JLIST DE PLAYLISTS
+        mainList = new JList<>(new String[0]);
         mainList.setBackground(new Color(64, 64, 64));
-        mainList.setCellRenderer(new ApoloListCellRenderer());
-        scrollPlaylists = new JScrollPane(mainList);
-        scrollPlaylists.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        JLabel mainListLabel = new JLabel("Playlists");
-        mainListLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        mainListLabel.setVerticalAlignment(SwingConstants.CENTER);
-        mainListLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        mainListLabel.setForeground(Color.WHITE);
+        JLabel mainList_label = new JLabel("Playlists");//label de playlist manager
+        mainList_label.setHorizontalAlignment(SwingConstants.CENTER);
+        mainList_label.setVerticalAlignment(SwingConstants.CENTER);
+        mainList_label.setFont(new Font("Arial", Font.BOLD, 20));
+        mainList_label.setForeground(Color.WHITE);
 
-        mainListPanel = new Panel(new BorderLayout());
-        mainListPanel.setBackground(Color.BLACK);
-        mainListPanel.add(mainListLabel, BorderLayout.NORTH);
-        mainListPanel.add(scrollPlaylists, BorderLayout.CENTER);
+        mainList_panel = new Panel(new BorderLayout());//panel de playlist manager
+        mainList_panel.setBackground(new Color(33, 41, 48));//cor de fundo que pega a label
+        mainList_panel.add(mainList_label, BorderLayout.NORTH);
+        mainList_panel.add(mainList, BorderLayout.CENTER);
+
     }
 
-    /**
-     * Creates a new playlist with the specified name.
-     * Adds the playlist to the manager and updates the UI accordingly.
-     * @return The created playlist object.
-     */
-    public void createPlaylist() {
-        String playlistName;
-        while (true) {
-            playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
 
-            if (playlistName == null) {
-                break;
-            }
+    public Playlist creatPlaylist(){
+        String playlistName = JOptionPane.showInputDialog("Enter the name of the new playlist:");
 
-            playlistName = playlistName.trim();
+        if (playlistName != null && !playlistName.isEmpty() && ( playlistName.length() <= 20 ) ) {
+            Playlist playlist = new Playlist(playlistName);
+            playlists.put(playlistName, playlist);
 
-            if (playlistName.length() < 1 || playlistName.length() > 20) {
-                JOptionPane.showMessageDialog(null, "Playlist name must be between 1 and 20 characters.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
-            } else if (playlists.containsKey(playlistName)) {
-                JOptionPane.showMessageDialog(null, "Playlist with this name already exists. Please choose a different name.", "Duplicate Name", JOptionPane.ERROR_MESSAGE);
-            } else {
-                Playlist playlist = new Playlist(playlistName);
-                playlists.put(playlistName, playlist);
+            // Atualiza a mainList com os nomes das playlists existentes
+            mainList.setListData(playlists.keySet().toArray(new String[0]));
 
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
+            // Adiciona a nova playlist ao cardLayout
+            playlists_panel.add(playlist.getPlaylist(), playlistName);
 
-                playlistPanel.add(playlist.getPlaylist(), playlistName);
-                return;
-            }
+            return playlist;
         }
-        return;
+        return null;
     }
 
 
-    /**
-     * Deletes the selected playlist from the manager.
-     * Removes the playlist from the UI and updates the main list of playlists.
-     * @param pm The playlist manager instance.
-     * @throws musicException If no playlist is selected for deletion.
-     */
-    public void deletePlaylist(PlaylistManager pm) throws musicException{
-        String selectedPlaylistName = mainList.getSelectedValue();
-        Playlist playlist = playlists.get(selectedPlaylistName);
+    public void deletePlaylist(){
+        String playlist_name = mainList.getSelectedValue();
+        Playlist playlist = playlists.get(playlist_name);
 
         if (playlist != null) {
-            int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
-            if (confirmPlaylistDel == JOptionPane.YES_OPTION) {
-                playlists.remove(selectedPlaylistName);
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
-
-                if (!playlists.isEmpty()) {
-                    mainList.setSelectedIndex(0);
-                } else{
-                    playlistPanel.remove(playlist.getPlaylist());
-                }
-
-                pm.saveToFile(pm);
-            }
-        }
-        else{
-            throw new musicException("Select a playlist before deleting!", "Null Playlist");
+            playlists_panel.remove(playlist.getPlaylist());
+            playlists.remove(playlist_name);
+            mainList.setListData(playlists.keySet().toArray(new String[0]));
         }
     }
 
 
-    /**
-     * Retrieves the main list of playlists.
-     * @return The JList containing the main list of playlists.
-     */
-    public JList getMainList() {
+    public void switchPlaylist(){
+        mainList.addListSelectionListener(e -> {
+            String selectedPlaylist = mainList.getSelectedValue();
+            cardLayout.show(playlists_panel, selectedPlaylist);
+        });
+    }
+
+
+    public JList getMainList(){
         return mainList;
     }
 
-    /**
-     * Retrieves the panel containing the playlist manager UI components.
-     * @return The panel containing the main list of playlists.
-     */
-    public Panel getMainListPanel() {
-        return mainListPanel;
+
+    public Panel getPlaylistManagerPanel(){
+        return mainList_panel;
     }
 
-    /**
-     * Retrieves the panel containing the playlists.
-     * @return The panel containing the playlists.
-     */
-    public JPanel getPlaylistPanel() {
-        return playlistPanel;
+
+    public JPanel getPlaylistCard() {
+        return playlists_panel;
     }
 
-    /**
-     * Retrieves the map of playlists.
-     * @return The map containing playlist names as keys and playlist objects as values.
-     */
-    public Map<String, Playlist> getMap() {
+
+    public Map<String, Playlist> getMap(){
         return playlists;
     }
 
-    /**
-     * Retrieves the card layout for managing playlists.
-     * @return The CardLayout object used for managing playlists.
-     */
-    public CardLayout getPlaylistCardLayout() {
-        return playlistCardlayout;
-    }
 
-
-    /**
-     * Saves the current state of the PlaylistManager to a file.
-     * @param pm The PlaylistManager instance to be saved.
-     */
     public void saveToFile(PlaylistManager pm){
         manager = pm;
 
-        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src/main/java/com/apolo/playlists.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
+        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
             writer.writeObject(manager);//escreve no arquivo
         }
         catch(IOException e){
@@ -186,48 +127,28 @@ public class PlaylistManager implements Serializable {
         }
     }
 
-    /**
-     * Loads the saved state of the PlaylistManager from a file.
-     */
+
     public void loadFile(){
-        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src/main/java/com/apolo/playlists.byte"))){//cria OIS para ler objetos do arquivo
+
+        try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("src\\main\\java\\com\\apolo\\playlist.byte"))){//cria OIS para ler objetos do arquivo
+
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
+
+            //reader.registerValidation(this, 0);//registra o objeto para validação. validação imediata (prioridade 0 / alta).
         }
+
         catch (FileNotFoundException e){
-            //JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
         }
+
         catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Something went wrong loading the playlists!", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /**
-     * Retrieves the PlaylistManager instance.
-     * @return The PlaylistManager instance.
-     */
+
     public PlaylistManager getManager(){
         return manager;
-    }
-
-
-    public class ApoloListCellRenderer extends DefaultListCellRenderer  implements Serializable{
-        private static final long serialVersionUID = 6L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (isSelected) {
-                setBackground(new Color(129, 13, 175));
-                setForeground(Color.BLACK);
-            }
-            else {
-                setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
-                setForeground(Color.BLACK);
-            }
-
-            return this;
-        }
     }
 
 
