@@ -98,11 +98,22 @@ public class Playlist implements Serializable {
 
 
     /**
-     * Custom cell renderer for displaying file names in the playlist.
+     * Custom list cell renderer for displaying music information in a JList with alternating background colors.
+     * Uses JAudioTagger to retrieve and display music information in an organized way.
      */
     public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer implements Serializable {
         private static final long serialVersionUID = 6L;
 
+        /**
+         * Overrides the getListCellRendererComponent method to customize the appearance of list cells.
+         *
+         * @param list           The JList object being rendered.
+         * @param value          The value to be rendered.
+         * @param index          The index of the value in the list.
+         * @param isSelected     True if the cell is selected, false otherwise.
+         * @param cellHasFocus   True if the cell has focus, false otherwise.
+         * @return A component representing the rendered cell.
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
@@ -144,10 +155,16 @@ public class Playlist implements Serializable {
         }
 
 
-    private String getMP3Duration(String filePath) {
+        /**
+         * Retrieves the formatted duration of an audio file for display in ApoloTaggerListCellRenderer.
+         *
+         * @param filePath The path to the audio file.
+         * @return The formatted duration of the audio file in "mm:ss" format.
+         */
+        private String getMP3Duration(String filePath) {
             try {
                 AudioFile audioFile = AudioFileIO.read(new File(filePath));
-                int trackLength = audioFile.getAudioHeader().getTrackLength(); // Duração da faixa em segundos
+                int trackLength = audioFile.getAudioHeader().getTrackLength();//get the track length in seconds
 
                 int minutes = trackLength / 60;
                 int seconds = trackLength % 60;
@@ -158,6 +175,13 @@ public class Playlist implements Serializable {
             return null;
         }
 
+
+        /**
+         * Retrieves the title of an audio file.
+         *
+         * @param filePath The path to the audio file.
+         * @return The title of the audio file.
+         */
         private String getMP3Title(String filePath) {
             try {
                 AudioFile audioFile = AudioFileIO.read(new File(filePath));
@@ -172,6 +196,12 @@ public class Playlist implements Serializable {
         }
 
 
+        /**
+         * Retrieves the album artwork of an MP3 audio file.
+         *
+         * @param filePath The path to the MP3 audio file.
+         * @return The album artwork as an ImageIcon, scaled to 30x30 pixels.
+         */
         private ImageIcon getMP3AlbumArtwork(String filePath) {
             try {
                 AudioFile audioFile = AudioFileIO.read(new File(filePath));
@@ -179,9 +209,10 @@ public class Playlist implements Serializable {
                 if (tag != null) {
                     Artwork artwork = tag.getFirstArtwork();
                     if (artwork != null) {
-                        byte[] imageData = artwork.getBinaryData();
+                        byte[] imageData = artwork.getBinaryData();//retrieve the binary data of the artwork
                         if (imageData != null) {
-                            return new ImageIcon(new ImageIcon(imageData).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+                            //create an ImageIcon from the image data and scale it to 30x30 pixels
+                            return new ImageIcon(new ImageIcon(imageData).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
                         }
                     }
                 }

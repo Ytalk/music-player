@@ -56,8 +56,8 @@ public class Apolo extends JFrame{
     private ImageIcon delIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
 
 
-    public class importUserPlaylists{
-        private boolean novo = false;
+    private class userImports{
+        private boolean noPlaylistsByte;
 
         public PlaylistManager getPlaylists() {
             PlaylistManager playlist_manager = new PlaylistManager();
@@ -66,31 +66,27 @@ public class Apolo extends JFrame{
                 playlist_manager = playlist_manager.getManager();
             }
             else{
-                novo = true;
+                noPlaylistsByte = true;
             }
             return playlist_manager;
         }
 
 
-        public void getSongs(){
-            if(novo) {
-                //obtém o diretório da pasta de músicas padrão
+        public void getMusicDirectory() {
+            if (noPlaylistsByte) {
                 File musicDirectoryPT = new File(System.getProperty("user.home") + "/Músicas");
                 File musicDirectory = new File(System.getProperty("user.home") + "/Music");
 
-                if ( musicDirectory.exists() || musicDirectoryPT.exists() ) {
-                    System.out.println("Pasta de músicas padrão: " + musicDirectory.getAbsolutePath());
-
-                    //todos os arquivos na pasta de músicas
+                if (musicDirectory.exists() || musicDirectoryPT.exists()) {
+                    //all files in the music folder
                     File[] files = musicDirectory.listFiles();
 
-                    //armazena os arquivos .mp3
+                    //store the .mp3 files
                     List<File> mp3Files = new ArrayList<>();
 
-                    //verifica cada arquivo na pasta
                     if (files != null) {
                         for (File file : files) {
-                            //verifica se é um arquivo .mp3
+                            //checks if it is an .mp3 file
                             if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
                                 mp3Files.add(file);
                             }
@@ -106,33 +102,29 @@ public class Apolo extends JFrame{
                         for (File mp3File : mp3Files) {
                             playlist.getListModel().addElement(mp3File.getAbsolutePath());
                         }
-                    }
-                    else {
-                        System.out.println("Nenhum arquivo .mp3 encontrado na pasta de músicas.");
+                    } else {
+                        System.out.println("No .mp3 files found in music folder.");
                     }
 
-                }
-                else {
-                    System.out.println("Pasta de músicas padrão não encontrada.");
+                } else {
+                    System.out.println("Default music folder not found.");
                 }
             }
+
         }
-
-
     }
 
     public Apolo(){
 
-        importUserPlaylists importUser = new importUserPlaylists();
-        playlistManager = importUser.getPlaylists();
+        userImports userImports = new userImports();
+        playlistManager = userImports.getPlaylists();
 
         mainList = playlistManager.getMainList();
         playlists = playlistManager.getMap();
         cardLayout = playlistManager.getCardLayout();
         playlistPanel = playlistManager.getPlaylistPanel();
 
-        importUser.getSongs();
-
+        userImports.getMusicDirectory();
 
 
         //ADD OR DELETE MUSIC
@@ -176,7 +168,7 @@ public class Apolo extends JFrame{
 
 
         JButton delMusicButton = new JButton(delIcon);
-        delMusicButton.setBounds(324, 27, 20, 10);// posição e tamanho
+        delMusicButton.setBounds(324, 27, 20, 10);
         delMusicButton.setBackground(Color.BLACK);
         delMusicButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         delMusicButton.setFocusPainted(false);
@@ -380,10 +372,10 @@ public class Apolo extends JFrame{
 
                     if (previousIndex >= 0) {
 
-                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//música anterior
+                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//previous song
                         System.out.println(file_path);
 
-                        selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//muda na JList para a música anterior
+                            selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//changes the JList to the previous song
 
                         music_path = file_path;
                         music.resetPlayback();
@@ -456,10 +448,10 @@ public class Apolo extends JFrame{
 
                     if (nextIndex < selectedPlaylist.getMp3List().getModel().getSize()) {
 
-                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//próxima música
+                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//next song
                         System.out.println(file_path);
 
-                        selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//muda na JList para a próxima música
+                        selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//changes the JList to the next song
 
                         music_path = file_path;
                         music.resetPlayback();
@@ -580,21 +572,21 @@ public class Apolo extends JFrame{
         playbackPanel.add( progressLabel );
 
 
-        //DETALHES DO FRAME
+        //FRAME DETAILS
         setLayout(null);
         setTitle("Harmonic Apolo");
         setPreferredSize(new Dimension(854, 480));
         getContentPane().setBackground( new Color( 40, 40, 40) );
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pack();//empacota/organiza
-        setLocationRelativeTo(null);//centraliza
+        pack();//organize/scale
+        setLocationRelativeTo(null);//centralize
         setVisible(true);
     }
 
 
     public ImageIcon getIcon(String pathIcon, int width, int height){
         URL imageUrl = getClass().getResource(pathIcon);
-        //interno usa URL para instanciar ImageIcon que é transformada em Image para redimensionar. Externo usa a Image para instanciar ImageIcon
+        //internal uses URL to instantiate ImageIcon which is transformed into Image for resizing. External uses Image to instantiate ImageIcon.
         return new ImageIcon( new ImageIcon(imageUrl).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH) );
     }
 

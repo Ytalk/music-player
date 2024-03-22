@@ -207,6 +207,9 @@ public class PlaybackManager implements Runnable {
     }
 
 
+    /**
+     * Starts a progress watcher to monitor the playback progress of the music and update the GUI accordingly.
+     */
     private void startProgressWatcher() {
         frameTimer = new Timer(1000, e -> {
             currentFrame += 45;
@@ -217,11 +220,9 @@ public class PlaybackManager implements Runnable {
             int seconds = (int) (progressSeconds % 60);
             progressLabel.setText( String.format("%02d:%02d", minutes, seconds) );
 
-            //calcula o progresso em relação à duração total
+            //calculate the progress as a percentage relative to the total duration
             double progress = (progressSeconds / duration) * 100;
-            //atualiza o valor da barra de progresso
             progressBar.setValue((int) progress);
-
         });
         frameTimer.start();
     }
@@ -237,10 +238,16 @@ public class PlaybackManager implements Runnable {
     }
 
 
+    /**
+     * Retrieves the duration of an MP3 audio file in seconds and updates the progress label with the formatted duration.
+     *
+     * @param filePath The path to the MP3 audio file.
+     * @return The duration of the audio file in seconds.
+     */
     private double getMP3Duration(String filePath) {
         try {
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            int trackLength = audioFile.getAudioHeader().getTrackLength();//duração da faixa em segundos
+            int trackLength = audioFile.getAudioHeader().getTrackLength();//track duration in seconds
 
             int minutes = trackLength / 60;
             int seconds = trackLength % 60;
@@ -253,6 +260,12 @@ public class PlaybackManager implements Runnable {
         return 0;
     }
 
+    
+    /**
+     * Retrieves the formatted duration of the MP3 audio file.
+     *
+     * @return The formatted duration of the MP3 audio file as "mm:ss".
+     */
     public String getFormatDuration() {
         return formatDuration;
     }

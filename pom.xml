@@ -8,6 +8,7 @@
     <artifactId>music-player</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -17,12 +18,14 @@
 
     <dependencies>
 
+        <!-- JLayer library to play audios (PlaybackManager) -->
         <dependency>
             <groupId>javazoom</groupId>
             <artifactId>jlayer</artifactId>
             <version>1.0.1</version>
         </dependency>
 
+        <!-- JAudioTagger library to collect the audio information and display it in the GUI (Apolo, Playlist) -->
         <dependency>
             <groupId>net.jthink</groupId>
             <artifactId>jaudiotagger</artifactId>
@@ -31,8 +34,11 @@
 
     </dependencies>
 
+
     <build>
         <plugins>
+
+            <!-- Exec Maven Plugin to run the project -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -42,30 +48,58 @@
                 </configuration>
             </plugin>
 
+            <!-- Maven Shade Plugin to generate JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.apolo.Apolo</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>shaded</shadedClassifierName>
+
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>com.apolo.Apolo</mainClass>
+                        </transformer>
+                    </transformers>
+                </configuration>
             </plugin>
+
+            <!-- Launch4j Maven Plugin to generate EXE using JAR -->
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.2.0</version>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>target/Harmonic-Apolo.exe</outfile>
+                            <jar>target/${artifactId}-${version}-shaded.jar</jar>
+                            <classPath>
+                                <mainClass>com.apolo.Apolo</mainClass>
+                            </classPath>
+                            <jre>
+                                <path>C:/Program Files/Java/jdk-21/bin</path>
+                            </jre>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

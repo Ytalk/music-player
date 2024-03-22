@@ -8,8 +8,8 @@ import javax.swing.JOptionPane;
  */
 public class musicException extends RuntimeException {
 
-    private String message; // Error message
-    private String error_name; // Name of the error
+    private String message; //error message
+    private String error_name; //name of the error
 
     /**
      * Constructs a new musicException object with the specified error message and name.
