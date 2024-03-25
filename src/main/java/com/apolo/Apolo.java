@@ -126,6 +126,15 @@ public class Apolo extends JFrame{
 
         userImports.getMusicDirectory();
 
+        String firstPlaylistName = mainList.getModel().getElementAt(0);
+        playlist = playlists.get(firstPlaylistName);
+        if(playlist != null){
+            mainList.setSelectedIndex(0);//if the first playlist is different from null, it is selected
+            if( playlist.getListModel().getSize() > 0 )
+                playlist.getMp3List().setSelectedIndex(0);//if the first playlist has at least one song, the first song is selected
+        }
+
+
 
         //ADD OR DELETE MUSIC
         JButton addMusicButton = new JButton(addIcon);
@@ -557,17 +566,17 @@ public class Apolo extends JFrame{
         playbackPanel.add(playbackControlBackground);
 
 
-        progressBar.setBounds(0, 4, 532, 5);
+        progressBar.setBounds(40, 4, 450, 5);
         progressBar.setForeground( new Color(129, 13, 175) );
         progressBar.setBackground(Color.WHITE);
         progressBar.setStringPainted(false);
         playbackPanel.add( progressBar );
 
-        durationLabel.setBounds(500, 13, 40, 10);
+        durationLabel.setBounds(500, 1, 40, 10);
         durationLabel.setForeground(Color.WHITE);
         playbackPanel.add( durationLabel );
 
-        progressLabel.setBounds( 0, 13, 40, 10 );
+        progressLabel.setBounds( 0, 1, 40, 10 );
         progressLabel.setForeground(Color.WHITE);
         playbackPanel.add( progressLabel );
 
