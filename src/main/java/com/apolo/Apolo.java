@@ -77,41 +77,44 @@ public class Apolo extends JFrame{
                 File musicDirectoryPT = new File(System.getProperty("user.home") + "/Músicas");
                 File musicDirectory = new File(System.getProperty("user.home") + "/Music");
 
-                if (musicDirectory.exists() || musicDirectoryPT.exists()) {
-                    //all files in the music folder
-                    File[] files = musicDirectory.listFiles();
-
-                    //store the .mp3 files
-                    List<File> mp3Files = new ArrayList<>();
-
-                    if (files != null) {
-                        for (File file : files) {
-                            //checks if it is an .mp3 file
-                            if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
-                                mp3Files.add(file);
-                            }
-                        }
-                    }
-
-                    if (!mp3Files.isEmpty()) {
-                        Playlist playlist = new Playlist("Music");
-                        playlists.put("Music", playlist);
-                        mainList.setListData(playlists.keySet().toArray(new String[0]));
-                        playlistPanel.add(playlist.getPlaylist(), "Music");
-
-                        for (File mp3File : mp3Files) {
-                            playlist.getListModel().addElement(mp3File.getAbsolutePath());
-                        }
-                    } else {
-                        System.out.println("No .mp3 files found in music folder.");
-                    }
-
-                } else {
+                if ( !(musicDirectory.exists() || musicDirectoryPT.exists()) ) {
                     System.out.println("Default music folder not found.");
+                    return;
                 }
-            }
 
+                //all files in the music folder
+                File[] files = musicDirectory.listFiles();
+
+                //store the .mp3 files
+                List<File> mp3Files = new ArrayList<>();
+
+                if (files != null) {
+                    for (File file : files) {
+                        //checks if it is an .mp3 file
+                        if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
+                            mp3Files.add(file);
+                        }
+                    }
+                }
+
+                if (mp3Files.isEmpty()) {
+                    System.out.println("No .mp3 files found in music folder.");
+                    return;
+                }
+
+                Playlist playlist = new Playlist("Music");
+                playlists.put("Music", playlist);
+                mainList.setListData(playlists.keySet().toArray(new String[0]));
+                mainList.setSelectedIndex(0);
+                playlistPanel.add(playlist.getPlaylist(), "Music");
+
+                for (File mp3File : mp3Files) {
+                    playlist.getListModel().addElement(mp3File.getAbsolutePath());
+                }
+                return;
+            }
         }
+
     }
 
     public Apolo(){
@@ -148,26 +151,24 @@ public class Apolo extends JFrame{
             try {
                 String selectedPlaylistName = mainList.getSelectedValue();
 
-                if (selectedPlaylistName == null) {
+                if (selectedPlaylistName == null)
                     throw new musicException("Select a playlist before adding a song!", "Null Playlist");
-                } else {
-                    JFileChooser fileChooser = new JFileChooser();
-                    fileChooser.setMultiSelectionEnabled(true);
-                    fileChooser.setDialogTitle("Specify files to add (press Ctrl for multi-selection)");
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3 Files", "mp3");
-                    fileChooser.setFileFilter(filter);
 
-                    int result = fileChooser.showOpenDialog(null);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        File[] selectedFiles = fileChooser.getSelectedFiles();
-                        playlist = playlists.get(selectedPlaylistName);
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setMultiSelectionEnabled(true);
+                fileChooser.setDialogTitle( "Specify files to add (press Ctrl for multi-selection)" );
+                fileChooser.setFileFilter( new FileNameExtensionFilter("MP3 Files", "mp3") );
 
-                        for (File selectedFile : selectedFiles) {
-                            playlist.getListModel().addElement( selectedFile.getAbsolutePath() );
-                        }
+                int result = fileChooser.showOpenDialog(null);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File[] selectedFiles = fileChooser.getSelectedFiles();
+                    playlist = playlists.get(selectedPlaylistName);
 
-                        playlistManager.saveToFile(playlistManager);
+                    for (File file : selectedFiles) {
+                        playlist.getListModel().addElement( file.getAbsolutePath() );
                     }
+
+                    playlistManager.saveToFile(playlistManager);
                 }
 
             } catch (musicException ex) {
@@ -187,15 +188,13 @@ public class Apolo extends JFrame{
             String selectedPlaylistName = mainList.getSelectedValue();
 
             try {
-                if (selectedPlaylistName == null) {
+                if (selectedPlaylistName == null)
                     throw new musicException("Select a playlist before deleting a song!", "Null Playlist");
-                }
 
                 playlist = playlists.get(selectedPlaylistName);
                 int selectedMusicPathIndex = playlist.getMp3List().getSelectedIndex();
-                if( selectedMusicPathIndex == -1 ){
+                if ( selectedMusicPathIndex == -1 )
                     throw new musicException("Select a song before deleting it!", "Null Music");
-                }
 
                 int confirmSongDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Song Deletion", JOptionPane.YES_NO_OPTION);
                 if (confirmSongDel == JOptionPane.YES_OPTION) {
@@ -304,32 +303,31 @@ public class Apolo extends JFrame{
                 try {
                     if(selectedPlaylist == null)
                         throw new musicException("Select a playlist first!", "Null Playlist");
-                    else {
-                        pause = false;
-                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        if(file_path == null)
-                            throw new musicException("Select a song first!", "Null Music");
+                    pause = false;
+                    String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                        if( file_path.equals(music_path) ) {//resume or repeat without printPath
-                            music.setMusic(music_path);
+                    if(file_path == null)
+                        throw new musicException("Select a song first!", "Null Music");
 
-                            musicThread = new Thread(music);
-                            musicThread.start();
-                        }
-                        else{//new play
-                            System.out.println(file_path);
-                            music_path = file_path;
+                    if( file_path.equals(music_path) ) {//resume or repeat without printPath
+                        music.setMusic(music_path);
 
-                            music.resetPlayback();
-                            music.setMusic(music_path);
-                            durationLabel.setText( music.getFormatDuration() );
-
-                            musicThread = new Thread(music);
-                            musicThread.start();
-                        }
-
+                        musicThread = new Thread(music);
+                        musicThread.start();
                     }
+                    else{//new play
+                        System.out.println(file_path);
+                        music_path = file_path;
+
+                        music.resetPlayback();
+                        music.setMusic(music_path);
+                        durationLabel.setText( music.getFormatDuration() );
+
+                        musicThread = new Thread(music);
+                        musicThread.start();
+                    }
+
                 } catch(musicException ex){
                     ex.showMessage();
                 }
@@ -376,36 +374,32 @@ public class Apolo extends JFrame{
             try {
                 if (selectedPlaylist == null)
                     throw new musicException("Select a playlist first!", "Null Playlist");
+
+                int previousIndex = selectedPlaylist.getMp3List().getSelectedIndex() - 1;
+                if (previousIndex >= 0) {
+                    String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//previous song
+                    System.out.println(file_path);
+                    selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//changes the JList to the previous song
+
+                    music_path = file_path;
+                    music.resetPlayback();
+                    pause = false;
+
+                    music.setMusic(file_path);
+                    durationLabel.setText( music.getFormatDuration() );
+
+                    musicThread = new Thread(music);
+                    musicThread.start();
+                }
                 else {
-                    int previousIndex = selectedPlaylist.getMp3List().getSelectedIndex() - 1;
+                    System.out.println("You're already on the first song.");
+                    String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                    if (previousIndex >= 0) {
-
-                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(previousIndex);//previous song
-                        System.out.println(file_path);
-
-                            selectedPlaylist.getMp3List().setSelectedIndex(previousIndex);//changes the JList to the previous song
-
-                        music_path = file_path;
-                        music.resetPlayback();
-                        pause = false;
-
-                        music.setMusic(file_path);
-                        durationLabel.setText( music.getFormatDuration() );
-
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
-                    else {
-                        System.out.println("You're already on the first song.");
-                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
-
-                        music.resetPlayback();
-                        pause = false;
-                        music.setMusic(file_path);
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
+                    music.resetPlayback();
+                    pause = false;
+                    music.setMusic(file_path);
+                    musicThread = new Thread(music);
+                    musicThread.start();
                 }
             } catch(musicException ex){
                 ex.showMessage();
@@ -452,36 +446,32 @@ public class Apolo extends JFrame{
             try {
                 if ( selectedPlaylist == null )
                     throw new musicException("Select a playlist first!", "Null Playlist");
+
+                int nextIndex = selectedPlaylist.getMp3List().getSelectedIndex() + 1;
+                if (nextIndex < selectedPlaylist.getMp3List().getModel().getSize()) {
+                    String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//next song
+                    System.out.println(file_path);
+                    selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//changes the JList to the next song
+
+                    music_path = file_path;
+                    music.resetPlayback();
+                    pause = false;
+
+                    music.setMusic(file_path);
+                    durationLabel.setText( music.getFormatDuration() );
+
+                    musicThread = new Thread(music);
+                    musicThread.start();
+                }
                 else {
-                    int nextIndex = selectedPlaylist.getMp3List().getSelectedIndex() + 1;
+                    System.out.println("There are no more songs in the playlist.");
+                    String file_path = selectedPlaylist.getMp3List().getSelectedValue();
 
-                    if (nextIndex < selectedPlaylist.getMp3List().getModel().getSize()) {
-
-                        String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(nextIndex);//next song
-                        System.out.println(file_path);
-
-                        selectedPlaylist.getMp3List().setSelectedIndex(nextIndex);//changes the JList to the next song
-
-                        music_path = file_path;
-                        music.resetPlayback();
-                        pause = false;
-
-                        music.setMusic(file_path);
-                        durationLabel.setText( music.getFormatDuration() );
-
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
-                    else {
-                        System.out.println("There are no more songs in the playlist.");
-                        String file_path = selectedPlaylist.getMp3List().getSelectedValue();
-
-                        music.resetPlayback();
-                        pause = false;
-                        music.setMusic(file_path);
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
+                    music.resetPlayback();
+                    pause = false;
+                    music.setMusic(file_path);
+                    musicThread = new Thread(music);
+                    musicThread.start();
                 }
             } catch(musicException ex){
                 ex.showMessage();
@@ -502,31 +492,35 @@ public class Apolo extends JFrame{
                     Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
 
                     if(selectedPlaylist != null){
-
                         //checks if the index of the selected one is less than that of the last one.
-                        if( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() && currentRepeatState == RepeatState.INACTIVE )
-                            next_button.doClick();
+                        switch( currentRepeatState ) {
 
-                        else if( currentRepeatState == RepeatState.REPEAT ) {
-                            play_button.doClick();
-                        }
-
-                        else if( currentRepeatState == RepeatState.REPEAT_ONCE ){
-                            if(counterRepeatOnce < 1){
-                                play_button.doClick();
-                                ++counterRepeatOnce;
-                            }
-                            else{
-                                if ( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() ) {
+                            case INACTIVE:
+                                if ( (selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex() )
                                     next_button.doClick();
+                                break;
+
+                            case REPEAT:
+                                play_button.doClick();
+                                break;
+
+                            case REPEAT_ONCE:
+                                if (counterRepeatOnce < 1) {
+                                    play_button.doClick();
+                                    ++counterRepeatOnce;
                                 }
-                                counterRepeatOnce = 0;
-                            }
+                                else {
+                                    if ((selectedPlaylist.getMp3List().getModel().getSize() - 1) > selectedPlaylist.getMp3List().getSelectedIndex()) {
+                                        next_button.doClick();
+                                    }
+                                    counterRepeatOnce = 0;
+                                }
+                                break;
+
                         }
-
                     }
-                }
 
+                }
             }
         });
 

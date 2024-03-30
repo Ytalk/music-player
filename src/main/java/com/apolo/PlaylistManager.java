@@ -75,7 +75,7 @@ public class PlaylistManager implements Serializable {
             playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
 
             if (playlistName == null) {
-                break;
+                return;
             }
 
             playlistName = playlistName.trim();
@@ -89,12 +89,12 @@ public class PlaylistManager implements Serializable {
                 playlists.put(playlistName, playlist);
 
                 mainList.setListData(playlists.keySet().toArray(new String[0]));
-
                 playlistPanel.add(playlist.getPlaylist(), playlistName);
+                //mainList.setSelectedIndex(0);
                 return;
             }
+
         }
-        return;
     }
 
 
@@ -108,24 +108,24 @@ public class PlaylistManager implements Serializable {
         String selectedPlaylistName = mainList.getSelectedValue();
         Playlist playlist = playlists.get(selectedPlaylistName);
 
-        if (playlist != null) {
-            int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
-            if (confirmPlaylistDel == JOptionPane.YES_OPTION) {
-                playlists.remove(selectedPlaylistName);
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
-
-                if (!playlists.isEmpty()) {
-                    mainList.setSelectedIndex(0);
-                } else{
-                    playlistPanel.remove(playlist.getPlaylist());
-                }
-
-                pm.saveToFile(pm);
-            }
-        }
-        else{
+        if (playlist == null) {
             throw new musicException("Select a playlist before deleting!", "Null Playlist");
         }
+
+        int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
+        if (confirmPlaylistDel == JOptionPane.YES_OPTION) {
+            playlists.remove(selectedPlaylistName);
+            mainList.setListData(playlists.keySet().toArray(new String[0]));
+
+            if (!playlists.isEmpty()) {
+                mainList.setSelectedIndex(0);
+            } else{
+                playlistPanel.remove(playlist.getPlaylist());
+            }
+
+            pm.saveToFile(pm);
+        }
+
     }
 
 
