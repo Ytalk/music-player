@@ -1,4 +1,4 @@
-package com.apolo;
+package com.apolo.gui;
 
 import javax.swing.JOptionPane;
 
@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
  * The `musicException` class represents an exception specific to the music player application.
  * It extends the RuntimeException class and provides custom error handling functionality.
  */
-public class musicException extends RuntimeException {
+public class MusicException extends RuntimeException {
 
     private String message; //error message
     private String error_name; //name of the error
@@ -16,7 +16,7 @@ public class musicException extends RuntimeException {
      * @param message The error message.
      * @param error_name The name of the error.
      */
-    public musicException(String message, String error_name) {
+    public MusicException(String message, String error_name) {
         this.message = message;
         this.error_name = error_name;
     }

@@ -1,9 +1,6 @@
-package com.apolo;
+package com.apolo.model;
 
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.advanced.AdvancedPlayer;
-import javazoom.jl.player.advanced.PlaybackEvent;
-import javazoom.jl.player.advanced.PlaybackListener;
+import com.apolo.gui.MusicException;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -23,6 +20,10 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.advanced.AdvancedPlayer;
+import javazoom.jl.player.advanced.PlaybackEvent;
+import javazoom.jl.player.advanced.PlaybackListener;
 
 /**
  * The `PlaybackManager` class represents a music player that can play audio files using the JavaLayer library.
@@ -52,12 +53,12 @@ public class PlaybackManager implements Runnable {
      * Sets the audio file to be played by the music player.
      *
      * @param filePath The path to the audio file to be played.
-     * @throws musicException If the specified file path is null or if the file does not exist.
+     * @throws MusicException If the specified file path is null or if the file does not exist.
      */
-    public void setMusic(String filePath) throws musicException {
+    public void setMusic(String filePath) throws MusicException {
         //check if the file path is null
         if (filePath == null) {
-            throw new musicException("Select a song first", "Null path");
+            throw new MusicException("Select a song first", "Null path");
         }
 
         //create a File object from the provided file path
@@ -65,7 +66,7 @@ public class PlaybackManager implements Runnable {
 
         //check if the file exists
         if (!file.exists()) {
-            throw new musicException("Song not found: " + filePath, "Path does not exist");
+            throw new MusicException("Song not found: " + filePath, "Path does not exist");
         }
 
         duration = getMP3Duration(filePath);

@@ -1,20 +1,33 @@
-package com.apolo;
+package com.apolo.model;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import com.apolo.gui.MusicException;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
-import java.io.ObjectInputValidation;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import java.awt.Panel;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.BorderLayout;
+import java.awt.Component;
+
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
 
 /**
  * The `PlaylistManager` class manages playlists in the music player application.
@@ -102,14 +115,14 @@ public class PlaylistManager implements Serializable {
      * Deletes the selected playlist from the manager.
      * Removes the playlist from the UI and updates the mainList of playlists.
      * @param pm The playlist manager instance.
-     * @throws musicException If no playlist is selected for deletion.
+     * @throws MusicException If no playlist is selected for deletion.
      */
-    public void deletePlaylist(PlaylistManager pm) throws musicException{
+    public void deletePlaylist(PlaylistManager pm) throws MusicException{
         String selectedPlaylistName = mainList.getSelectedValue();
         Playlist playlist = playlists.get(selectedPlaylistName);
 
         if (playlist == null) {
-            throw new musicException("Select a playlist before deleting!", "Null Playlist");
+            throw new MusicException("Select a playlist before deleting!", "Null Playlist");
         }
 
         int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
