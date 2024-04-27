@@ -34,7 +34,7 @@ public class PlaybackManager implements Runnable {
     private boolean playing = false; // Flag to indicate whether the player is currently playing
     private ChangeListener changeListener; // Listener for state change events
     private AdvancedPlayer player; // The player responsible for audio playback
-    private File file; // The audio file to be played
+    protected File file; // The audio file to be played
     private Timer frameTimer;
 
     private int currentFrame = 0; // Current frame position within the audio file

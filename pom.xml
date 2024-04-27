@@ -33,16 +33,25 @@
 
         <!-- JUnit library is used to run unit tests in java -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
 
+        <!-- Engine JUnit -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.12.4</version>
+            <version>5.4.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -107,7 +116,7 @@
                                 <mainClass>com.apolo.gui.Apolo</mainClass>
                             </classPath>
                             <jre>
-                                <path>C:/Program Files/Java/jdk-21/bin</path>
+                                <path>C:/Dev/Tools/Java/bin</path>
                             </jre>
                         </configuration>
                     </execution>

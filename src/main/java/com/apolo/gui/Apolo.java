@@ -34,6 +34,9 @@ import javax.swing.JFrame;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
+
 public class Apolo extends JFrame{
 
     private PlaylistManager playlistManager;
@@ -214,6 +217,47 @@ public class Apolo extends JFrame{
 
         playlistPanel.setBounds(286, 20, 532, 310);//position and size of the panel with the songs
         add(playlistPanel);
+
+
+        //create a DropTarget and set it to the panel
+        DropTarget dropTarget = new DropTarget(playlistPanel, new DropTargetAdapter() {
+            public void drop(DropTargetDropEvent dtde) {
+                try {
+                    String selectedPlaylistName = mainList.getSelectedValue();
+
+                    if (selectedPlaylistName == null)
+                        throw new MusicException("Select a playlist before adding a song!", "Null Playlist");
+
+                    //check if the dropped data is a list of files
+                    if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                        dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                        List<File> files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+                        playlist = playlists.get(selectedPlaylistName);
+
+                        for (File file : files) {
+                            if (file.getName().endsWith(".mp3")) {
+                                //add the path of the MP3 file to the JList
+                                playlist.getListModel().addElement( file.getAbsolutePath() );
+                            }
+                        }
+                        dtde.dropComplete(true);
+                    } else {
+                        dtde.rejectDrop();
+                    }
+                }
+                catch (MusicException e) {
+                    e.showMessage();
+                    dtde.dropComplete(false);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    dtde.dropComplete(false);
+                }
+            }
+        });
+
+        playlistPanel.setDropTarget(dropTarget);
 
 
 
