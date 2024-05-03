@@ -2,7 +2,7 @@
 
 ## 🎵 About
 
-**Apolo** is a music player that aims to manage or download music. Allows you to show notes (like a tuner) and record audio.
+**Harmonic Apolo** is a music player in Java that aims to manage music through playlist handling. Focusing on simplicity and efficiency, using third-party libraries for file handling and Swing for the GUI, Apolo offers the key features of a music player in an intuitive, practical, and harmonious way.
 
 - Create, delete and switch between playlists.
   ![GIF add/switch/del playlists](src/main/resources/gifs/playlists.gif)
@@ -42,9 +42,11 @@ $ cd music-player
 
 #Linux/macOS:
 $ make lpermission
+$ make compile
 $ make run
 
 #Windows:
+$ make compile
 $ make run
 ```
 
@@ -55,8 +57,10 @@ $ make run
 
 #Linux/macOS:
 $ chmod +x mvnw
+$ ./mvnw compile
 $ ./mvnw exec:java
 
 #Windows:
+$ ./mvnw compile
 $ ./mvnw exec:java
 ```

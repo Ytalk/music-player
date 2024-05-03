@@ -125,6 +125,7 @@ public class Playlist implements Serializable {
             if (value instanceof String) {
                 String filePath = (String) value;
                 String fileName = new File(filePath).getName().replaceFirst("[.][^.]+$", "");
+
                 ImageIcon albumArt = getMP3AlbumArtwork(filePath);
                 String title = getMP3Title(filePath);
                 String duration = getMP3Duration(filePath);
