@@ -7,11 +7,11 @@
 - Create, delete and switch between playlists.
   ![GIF add/switch/del playlists](src/main/resources/gifs/playlists.gif)
 
-- Add music, play, pause and resume.
-  ![GIF add music and play/resume](src/main/resources/gifs/music-play.gif)
+- Add (button or drag and drop), delete and switch between playlists.
+  ![GIF add music and play/resume](src/main/resources/gifs/songs.gif)
 
-- When a song ends, it goes to the next one in the playlist, unless repeat is active or it is at the end of the queue.
-  ![GIF playback control](src/main/resources/gifs/playback-control.gif)
+- When a song ends, it goes to the next one in the playlist, unless repeat is active or it is at the end of the queue. In addition, it has all the main features of a playback-control.
+  ![GIF playback control](src/main/resources/gifs/playback.gif)
 
 ## 🔨 Tools
 
