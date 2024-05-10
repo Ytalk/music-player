@@ -1,5 +1,7 @@
 package com.apolo.gui;
 
+import com.apolo.controller.ListenerController;
+import com.apolo.controller.ListenerControllerInterface;
 import com.apolo.model.Playlist;
 import com.apolo.model.PlaylistManager;
 import com.apolo.model.PlaybackManager;
@@ -39,190 +41,58 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DnDConstants;
 import java.awt.datatransfer.DataFlavor;
 
-public class Apolo extends JFrame{
+public class Apolo extends JFrame {
 
-    private PlaylistManager playlistManager;
-    private Map<String, Playlist> playlists;//stores Playlist instances
-    private JPanel playlistPanel;
-    private JList<String> mainList;
-    private Playlist playlist;
-    private CardLayout cardLayout;
+    private ListenerControllerInterface listenerController = new ListenerController();
+    private JPanel playlistPanel = listenerController.getPlaylistPanel();
+    private PlaylistManager playlistManager = listenerController.getPlaylistManager();
+    private JList mainList = playlistManager.getMainList();
+    private CardLayout cardLayout = playlistManager.getCardLayout();
 
-    private JProgressBar progressBar = new JProgressBar(0, 100);
+
+    private JButton repeatButton = listenerController.formatButton( listenerController.getIcon("/icons/repeat-song-512.png", 23, 23), 64, false );
+
+    private JButton playButton = listenerController.formatButton( listenerController.getIcon("/icons/48_circle_play_icon.png", 43, 43), 64, false );
+    private JButton previousButton = listenerController.formatButton( listenerController.getIcon("/icons/48_music_next_player_icon.png", 38, 38), 64, false );
+    private JButton nextButton = listenerController.formatButton( listenerController.getIcon("/icons/o48_music_next_player_icon.png", 38, 38), 64, false );
+
+    private ImageIcon addIcon = listenerController.getIcon("/icons/392_4-more-white.png", 17, 17);
+    private ImageIcon delIcon = listenerController.getIcon("/icons/rectangle-632-180.png", 17, 7);
+
+    private JButton addMusicButton = listenerController.formatButton(addIcon, 0, true);
+    private JButton delMusicButton = listenerController.formatButton(delIcon, 0, true);
+    private JButton createPlaylistButton = listenerController.formatButton(addIcon, 0, true);
+    private JButton deletePlaylistButton = listenerController.formatButton(delIcon, 0, true);
+
+
+    //private JProgressBar progressBar = new JProgressBar(0, 100);
+    private JProgressBar progressBar = listenerController.getProgressBar();
     private JLabel durationLabel = new JLabel( "00:00" );
-    private JLabel progressLabel = new JLabel( "00:00" );
-
-    private PlaybackManager music = new PlaybackManager( progressBar, progressLabel );
-    private Thread musicThread = new Thread(music);
-
-    private boolean pause = true;
-    private String music_path;
-
-    private enum RepeatState { INACTIVE, REPEAT, REPEAT_ONCE }
-    private RepeatState currentRepeatState = RepeatState.INACTIVE;
-    private int counterRepeatOnce = 0;
-    private JButton repeatButton = formatButton( getIcon("/icons/repeat-song-512.png", 23, 23), 64, false );
-
-    private JButton playButton = formatButton( getIcon("/icons/48_circle_play_icon.png", 43, 43), 64, false );
-    private JButton previousButton = formatButton( getIcon("/icons/48_music_next_player_icon.png", 38, 38), 64, false );
-    private JButton nextButton = formatButton( getIcon("/icons/o48_music_next_player_icon.png", 38, 38), 64, false );
-
-    private ImageIcon addIcon = getIcon("/icons/392_4-more-white.png", 17, 17);
-    private ImageIcon delIcon = getIcon("/icons/rectangle-632-180.png", 17, 7);
-
-    private JButton addMusicButton = formatButton(addIcon, 0, true);
-    private JButton delMusicButton = formatButton(delIcon, 0, true);
-    private JButton createPlaylistButton = formatButton(addIcon, 0, true);
-    private JButton deletePlaylistButton = formatButton(delIcon, 0, true);
+    //private JLabel progressLabel = new JLabel( "00:00" );
+    private JLabel progressLabel = listenerController.getProgressLabel();
 
 
-    private class userImports{
-        private boolean noPlaylistsByte = false;
-
-        public PlaylistManager getPlaylists() {
-            PlaylistManager playlist_manager = new PlaylistManager();
-            playlist_manager.loadFile();
-            if (playlist_manager.getManager() != null) {
-                playlist_manager = playlist_manager.getManager();
-            }
-            else{
-                noPlaylistsByte = true;
-            }
-            return playlist_manager;
-        }
 
 
-        public void getMusicDirectory() {
-            if (noPlaylistsByte) {
-                File musicDirectoryPT = new File(System.getProperty("user.home") + "/Músicas");
-                File musicDirectory = new File(System.getProperty("user.home") + "/Music");
-
-                if ( !( musicDirectory.exists() || musicDirectoryPT.exists() ) ) {
-                    System.out.println("Default music folder not found.");
-                    return;
-                }
-
-                File[] files;
-                //all files in the music folder
-                if (musicDirectory.exists()){
-                    files = musicDirectory.listFiles();
-                } else {
-                    files = musicDirectoryPT.listFiles();
-                }
-
-                //store the .mp3 files
-                List<File> mp3Files = new ArrayList<>();
-
-                if (files != null) {
-                    for (File file : files) {
-                        //checks if it is an .mp3 file
-                        if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
-                            mp3Files.add(file);
-                        }
-                    }
-                }
-
-                if (mp3Files.isEmpty()) {
-                    System.out.println("No .mp3 files found in music folder.");
-                    return;
-                }
-
-                Playlist playlist = new Playlist("Music");
-                playlists.put("Music", playlist);
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
-                mainList.setSelectedIndex(0);
-                playlistPanel.add(playlist.getPlaylist(), "Music");
-
-                for (File mp3File : mp3Files) {
-                    playlist.getListModel().addElement(mp3File.getAbsolutePath());
-                }
-            }
-        }
-
-    }
-
-
-    private JButton formatButton( ImageIcon icon, int RGB, boolean bool ){
-        JButton bnt = new JButton( icon );
-        bnt.setBackground(new Color(RGB, RGB, RGB));
-        bnt.setBorder( BorderFactory.createEmptyBorder() );
-        bnt.setFocusPainted(false);
-        bnt.setContentAreaFilled(bool);
-        add(bnt);
-        return bnt;
-    }
 
 
     public Apolo(){
 
-        userImports userImports = new userImports();
-        playlistManager = userImports.getPlaylists();
 
-        mainList = playlistManager.getMainList();
-        playlists = playlistManager.getMap();
-        cardLayout = playlistManager.getCardLayout();
-        playlistPanel = playlistManager.getPlaylistPanel();
-
-
-        userImports.getMusicDirectory();
 
 
         //ADD OR DELETE MUSIC
         addMusicButton.setBounds(758, 22, 20, 20);
 
         addMusicButton.addActionListener(e -> {
-            try {
-                String selectedPlaylistName = mainList.getSelectedValue();
-
-                if (selectedPlaylistName == null)
-                    throw new MusicException("Select a playlist before adding a song!", "Null Playlist");
-
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setMultiSelectionEnabled(true);
-                fileChooser.setDialogTitle( "Specify files to add (press Ctrl for multi-selection)" );
-                fileChooser.setFileFilter( new FileNameExtensionFilter("MP3 Files", "mp3") );
-
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File[] selectedFiles = fileChooser.getSelectedFiles();
-                    playlist = playlists.get(selectedPlaylistName);
-
-                    for (File file : selectedFiles) {
-                        playlist.getListModel().addElement( file.getAbsolutePath() );
-                    }
-
-                    playlistManager.saveToFile(playlistManager);
-                }
-
-            } catch (MusicException ex) {
-                ex.showMessage();
-            }
+            listenerController.addMisicByButton();
         });
 
 
         delMusicButton.setBounds(324, 27, 20, 10);
 
         delMusicButton.addActionListener(e -> {
-            String selectedPlaylistName = mainList.getSelectedValue();
-
-            try {
-                if (selectedPlaylistName == null)
-                    throw new MusicException("Select a playlist before deleting a song!", "Null Playlist");
-
-                playlist = playlists.get(selectedPlaylistName);
-                int selectedMusicPathIndex = playlist.getMp3List().getSelectedIndex();
-                if ( selectedMusicPathIndex == -1 )
-                    throw new MusicException("Select a song before deleting it!", "Null Music");
-
-                int confirmSongDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Song Deletion", JOptionPane.YES_NO_OPTION);
-                if (confirmSongDel == JOptionPane.YES_OPTION) {
-                    playlist.getListModel().remove(selectedMusicPathIndex);
-                    playlistManager.saveToFile(playlistManager);
-                }
-            }
-            catch (MusicException ex){
-                ex.showMessage();
-            }
+            listenerController.delMusic();
         });
 
 
@@ -231,42 +101,11 @@ public class Apolo extends JFrame{
 
 
         //create a DropTarget and set it to the panel
-        DropTarget addMusicDropTarget = new DropTarget(playlistPanel, new DropTargetAdapter() {
-            public void drop(DropTargetDropEvent dtde) {
-                try {
-                    String selectedPlaylistName = mainList.getSelectedValue();
-
-                    if (selectedPlaylistName == null)
-                        throw new MusicException("Select a playlist before adding a song!", "Null Playlist");
-
-                    //check if the dropped data is a list of files
-                    if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                        dtde.acceptDrop(DnDConstants.ACTION_COPY);
-                        List<File> files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-                        playlist = playlists.get(selectedPlaylistName);
-
-                        for (File file : files) {
-                            playlist.getListModel().addElement( file.getAbsolutePath() );
-                        }
-                        dtde.dropComplete(true);
-                        playlistManager.saveToFile(playlistManager);
-                    } else {
-                        dtde.rejectDrop();
-                    }
-                }
-                catch (MusicException e) {
-                    e.showMessage();
-                    dtde.dropComplete(false);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    dtde.dropComplete(false);
-                }
-            }
+        /*DropTarget addMusicDropTarget = new DropTarget(playlistPanel, new DropTargetAdapter() {
+            listenerController.addMusicByDropTarget();
         });
 
-        playlistPanel.setDropTarget(addMusicDropTarget);
+        playlistPanel.setDropTarget(addMusicDropTarget);*/
 
 
 
@@ -303,7 +142,7 @@ public class Apolo extends JFrame{
 
         //listener to switch between playlists
         mainList.addListSelectionListener(e -> {
-            String selectedPlaylist = mainList.getSelectedValue();
+            String selectedPlaylist = (String) mainList.getSelectedValue();
             cardLayout.show(playlistPanel, selectedPlaylist);
             addMusicButton.repaint();
             delMusicButton.repaint();
@@ -324,52 +163,13 @@ public class Apolo extends JFrame{
             }
 
             private void updateIcon(int size) {
-                String iconName = music.isPlaying() ? "/icons/48_circle_pause_icon.png" : "/icons/48_circle_play_icon.png";
-                playButton.setIcon( getIcon(iconName, size, size) );
+                String iconName = listenerController.getMusic().isPlaying() ? "/icons/48_circle_pause_icon.png" : "/icons/48_circle_play_icon.png";
+                playButton.setIcon( listenerController.getIcon(iconName, size, size) );
             }
         });
 
         playButton.addActionListener(e -> {
-            if(music.isPlaying()){//pause
-                pause = true;
-                music.pausePlayblack();
-            }
-            else {//play
-                String selectedPlaylistName = mainList.getSelectedValue();
-                Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
-
-                try {
-                    if(selectedPlaylist == null)
-                        throw new MusicException("Select a playlist first!", "Null Playlist");
-
-                    pause = false;
-                    String file_path = selectedPlaylist.getMp3List().getSelectedValue();
-
-                    if(file_path == null)
-                        throw new MusicException("Select a song first!", "Null Music");
-
-                    if( file_path.equals(music_path) ) {//resume or repeat without printPath
-                        music.setMusic(music_path);
-
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
-                    else{//new play
-                        System.out.println(file_path);
-                        music_path = file_path;
-
-                        music.resetPlayback();
-                        music.setMusic(music_path);
-                        durationLabel.setText( music.getFormatDuration() );
-
-                        musicThread = new Thread(music);
-                        musicThread.start();
-                    }
-
-                } catch(MusicException ex){
-                    ex.showMessage();
-                }
-            }
+            listenerController.playButton(durationLabel);
         });
 
 
@@ -391,12 +191,12 @@ public class Apolo extends JFrame{
             }
 
             private void updateIcon(int size) {
-                previousButton.setIcon( getIcon("/icons/48_music_next_player_icon.png", size, size) );
+                previousButton.setIcon( listenerController.getIcon("/icons/48_music_next_player_icon.png", size, size) );
             }
         });
 
         previousButton.addActionListener(e -> {
-            skipMusic(-1);
+            listenerController.skipMusic(-1, durationLabel);
         });
 
 
@@ -418,24 +218,24 @@ public class Apolo extends JFrame{
             }
 
             private void updateIcon(int size) {
-                nextButton.setIcon( getIcon("/icons/o48_music_next_player_icon.png", size, size) );
+                nextButton.setIcon( listenerController.getIcon("/icons/o48_music_next_player_icon.png", size, size) );
             }
         });
 
         nextButton.addActionListener( e -> {
-            skipMusic(1);
+            listenerController.skipMusic(1, durationLabel);
         });
 
 
 
-        music.addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
-            handleMusicChange();
+        listenerController.getMusic().addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
+            listenerController.handleMusicChange(playButton, durationLabel);
         });
 
 
 
         repeatButton.addActionListener(e -> {
-            toggleRepeatState();
+            listenerController.toggleRepeatState(repeatButton);
         });
 
 
@@ -456,7 +256,7 @@ public class Apolo extends JFrame{
         playbackControl.setBounds(182, 27, 230, 48);
         playbackPanel.add(playbackControl);
 
-        JLabel playbackControlBackground = new JLabel( getIcon("/icons/playback-control.png", 400, 70) );
+        JLabel playbackControlBackground = new JLabel( listenerController.getIcon("/icons/playback-control.png", 400, 70) );
         playbackControlBackground.setBounds(67, 16, 400, 70);
         playbackPanel.add(playbackControlBackground);
 
@@ -485,129 +285,6 @@ public class Apolo extends JFrame{
         pack();//organize/scale
         setLocationRelativeTo(null);//centralize
         setVisible(true);
-    }
-
-
-    public ImageIcon getIcon(String pathIcon, int width, int height){
-        URL imageUrl = getClass().getResource(pathIcon);
-        //internal uses URL to instantiate ImageIcon which is transformed into Image for resizing. External uses Image to instantiate ImageIcon.
-        return new ImageIcon( new ImageIcon(imageUrl).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH) );
-    }
-
-
-    private void toggleRepeatState() {
-        switch (currentRepeatState) {
-            case INACTIVE:
-                currentRepeatState = RepeatState.REPEAT;
-                repeatButton.setIcon( getIcon("/icons/repeat-song-1-512.png", 23, 23) );
-                break;
-
-            case REPEAT:
-                currentRepeatState = RepeatState.REPEAT_ONCE;
-                repeatButton.setIcon( getIcon("/icons/repeat-song-once-1-512.png", 23, 23) );
-                break;
-
-            case REPEAT_ONCE:
-                currentRepeatState = RepeatState.INACTIVE;
-                repeatButton.setIcon( getIcon("/icons/repeat-song-512.png", 23, 23) );
-                break;
-        }
-    }
-
-
-    private void handleMusicChange() {
-        if (music.isPlaying()) {
-            playButton.setIcon(getIcon("/icons/48_circle_pause_icon.png", 43, 43));
-        }
-        else {
-            playButton.setIcon(getIcon("/icons/48_circle_play_icon.png", 43, 43));
-
-            if (!pause) {
-                String selectedPlaylistName = mainList.getSelectedValue();
-                Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
-
-                if (selectedPlaylist != null) {
-                    handlePlaybackState(selectedPlaylist);
-                }
-            }
-
-        }
-    }
-
-    private void handlePlaybackState(Playlist selectedPlaylist) {
-        int playlistSize = selectedPlaylist.getMp3List().getModel().getSize();
-        int currentIndex = selectedPlaylist.getMp3List().getSelectedIndex();
-
-        switch (currentRepeatState) {
-            case INACTIVE:
-                if (currentIndex < playlistSize - 1) {
-                    nextButton.doClick();
-                }
-                break;
-
-            case REPEAT:
-                playButton.doClick();
-                break;
-
-            case REPEAT_ONCE:
-                handleRepeatOnce(playlistSize, currentIndex);
-                break;
-        }
-    }
-
-    private void handleRepeatOnce(int playlistSize, int currentIndex) {
-        if (counterRepeatOnce < 1) {
-            playButton.doClick();
-            counterRepeatOnce++;
-        } else {
-            if (currentIndex < playlistSize - 1) {
-                nextButton.doClick();
-            }
-            counterRepeatOnce = 0;
-        }
-    }
-
-
-    public void skipMusic(int nextOrPrevious){
-        pause = true;
-        music.pausePlayblack();
-
-        String selectedPlaylistName = mainList.getSelectedValue();
-        Playlist selectedPlaylist = playlists.get(selectedPlaylistName);
-
-        try {
-            if ( selectedPlaylist == null )
-                throw new MusicException("Select a playlist first!", "Null Playlist");
-
-            int newIndex = selectedPlaylist.getMp3List().getSelectedIndex() + nextOrPrevious;
-            if (newIndex < selectedPlaylist.getMp3List().getModel().getSize() && newIndex >= 0) {
-                String file_path = selectedPlaylist.getMp3List().getModel().getElementAt(newIndex);//next or previous song
-                System.out.println(file_path);
-                selectedPlaylist.getMp3List().setSelectedIndex(newIndex);//changes the JList to the next or previous song
-
-                music_path = file_path;
-                music.resetPlayback();
-                pause = false;
-
-                music.setMusic(file_path);
-                durationLabel.setText( music.getFormatDuration() );
-
-                musicThread = new Thread(music);
-                musicThread.start();
-            }
-            else {
-                System.out.println("There are no more songs in the playlist.");
-                String file_path = selectedPlaylist.getMp3List().getSelectedValue();
-
-                music.resetPlayback();
-                pause = false;
-                music.setMusic(file_path);
-                musicThread = new Thread(music);
-                musicThread.start();
-            }
-        } catch(MusicException ex){
-            ex.showMessage();
-        }
     }
 
 
