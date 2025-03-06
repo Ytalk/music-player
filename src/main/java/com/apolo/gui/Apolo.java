@@ -351,8 +351,9 @@ public class Apolo extends JFrame{
                     if( file_path.equals(music_path) ) {//resume or repeat without printPath
                         music.setMusic(music_path);
 
-                        musicThread = new Thread(music);
-                        musicThread.start();
+                        //musicThread = new Thread(music);
+                        //musicThread.start();
+                        music.startPlayback();
                     }
                     else{//new play
                         System.out.println(file_path);
@@ -362,8 +363,9 @@ public class Apolo extends JFrame{
                         music.setMusic(music_path);
                         durationLabel.setText( music.getFormatDuration() );
 
-                        musicThread = new Thread(music);
-                        musicThread.start();
+                        //musicThread = new Thread(music);
+                        //musicThread.start();
+                        music.startPlayback();
                     }
 
                 } catch(MusicException ex){

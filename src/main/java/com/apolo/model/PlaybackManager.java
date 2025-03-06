@@ -43,9 +43,53 @@ public class PlaybackManager implements Runnable {
     private String formatDuration;
     private JLabel progressLabel;
 
+    private Thread playbackThread;
+
+    public synchronized void startPlayback() {
+        stopPlayback();
+
+        playbackThread = new Thread(this);
+        playbackThread.start();
+    }
+
+    public synchronized void stopPlayback() {
+        if(playbackThread != null && playbackThread.isAlive()) {
+            playbackThread.interrupt();
+            try {
+                playbackThread.join(); //aguarda a thread finalizar
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); //mantém o estado de interrupção
+            }
+        }
+    }
+
     public PlaybackManager(JProgressBar progressBar, JLabel progressLabel) {
         this.progressBar = progressBar;
         this.progressLabel = progressLabel;
+
+        //listener para permitir arrastar a barra de progresso
+        progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                int mouseX = evt.getX();
+                int progressBarVal = (int) Math.round(((double) mouseX / progressBar.getWidth()) * progressBar.getMaximum());
+
+                progressBar.setValue(progressBarVal);
+
+                double newProgress = (progressBarVal / 100.0) * duration;
+                currentFrame = (int) (newProgress * 45); //45 frames por segundo
+
+                if (isPlaying()) {
+                    System.out.println("pausa, encerra thread e inicia uma nova...");
+                    pausePlayblack();
+                    stopPlayback();
+                    startPlayback();
+                }
+
+                progressBar.setValue(progressBarVal);
+            }
+        });
+
     }
 
 
