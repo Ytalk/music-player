@@ -46,8 +46,6 @@ public class PlaybackManager implements Runnable {
     private Thread playbackThread;
 
     public synchronized void startPlayback() {
-        stopPlayback();
-
         playbackThread = new Thread(this);
         playbackThread.start();
     }

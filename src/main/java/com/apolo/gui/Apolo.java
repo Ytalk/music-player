@@ -351,8 +351,6 @@ public class Apolo extends JFrame{
                     if( file_path.equals(music_path) ) {//resume or repeat without printPath
                         music.setMusic(music_path);
 
-                        //musicThread = new Thread(music);
-                        //musicThread.start();
                         music.startPlayback();
                     }
                     else{//new play
@@ -363,8 +361,6 @@ public class Apolo extends JFrame{
                         music.setMusic(music_path);
                         durationLabel.setText( music.getFormatDuration() );
 
-                        //musicThread = new Thread(music);
-                        //musicThread.start();
                         music.startPlayback();
                     }
 
@@ -466,6 +462,7 @@ public class Apolo extends JFrame{
         progressBar.setBounds(40, 4, 450, 5);
         progressBar.setForeground( new Color(129, 13, 175) );
         progressBar.setBackground(Color.WHITE);
+        progressBar.setUI( new CustomProgressBarUI() );
         progressBar.setStringPainted(false);
         playbackPanel.add( progressBar );
 
