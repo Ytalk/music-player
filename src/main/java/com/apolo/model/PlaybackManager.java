@@ -81,6 +81,7 @@ public class PlaybackManager implements Runnable {
                     System.out.println("pausa, encerra thread e inicia uma nova...");
                     pausePlayblack();
                     stopPlayback();
+                    //frameTimer.stop();/////////////////
                     startPlayback();
                 }
 
