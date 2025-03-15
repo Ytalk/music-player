@@ -5,39 +5,23 @@ import com.apolo.model.PlaybackManager;
 import com.apolo.model.Playlist;
 import com.apolo.model.PlaylistManager;
 
-import com.apolo.controller.ListenerController;
-import com.apolo.controller.ListenerControllerInterface;
-import com.apolo.model.Playlist;
-import com.apolo.model.PlaylistManager;
-import com.apolo.model.PlaybackManager;
-
 import java.io.File;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import java.net.URL;
 
 import java.awt.Color;
 import java.awt.Image;
-import java.awt.CardLayout;
-import java.awt.GridLayout;
-import java.awt.Panel;
-import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
-import javax.swing.JPanel;
 import javax.swing.ImageIcon;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.dnd.DropTarget;
@@ -48,22 +32,12 @@ import java.awt.datatransfer.DataFlavor;
 
 public class ListenerController implements ListenerControllerInterface{
     private PlaylistManager playlistManager;
-    //private Map<String, Playlist> playlists;//stores Playlist instances
-    //private JPanel playlistPanel;
-    //private JList<String> mainList;
     private Playlist playlist;
-    //private CardLayout cardLayout;
 
+    private JProgressBar progressBar;
+    private JLabel progressLabel;
 
-
-    private JProgressBar progressBar = new JProgressBar(0, 100);
-    private JLabel durationLabel = new JLabel( "00:00" );
-    private JLabel progressLabel = new JLabel( "00:00" );
-
-
-
-
-    private PlaybackManager music = new PlaybackManager( progressBar, progressLabel );
+    private PlaybackManager music = new PlaybackManager();
     private Thread musicThread = new Thread(music);
 
     private boolean pause = true;
@@ -73,15 +47,20 @@ public class ListenerController implements ListenerControllerInterface{
     private RepeatState currentRepeatState = RepeatState.INACTIVE;
     private int counterRepeatOnce = 0;
 
+    public ListenerController(JProgressBar progressBar, JLabel progressLabel){
+        this.progressBar = progressBar;
+        this.progressLabel = progressLabel;
+
+        //registra um Listener
+        music.setProgressListener((progressBarValue, formattedProgressText) -> {
+            progressBar.setValue(progressBarValue);
+            progressLabel.setText(formattedProgressText);
+        });
+    }
 
     public PlaybackManager getMusic() {
         return music;
     }
-
-
-    /*public JPanel getPlaylistPanel(){
-        return playlistPanel;
-    }*/
 
     public PlaylistManager getPlaylistManager() {
         return playlistManager;
@@ -235,9 +214,8 @@ public class ListenerController implements ListenerControllerInterface{
         }
     }
 
-        public DropTarget addMusicByDropTarget(){
-            DropTarget addMusicDropTarget = new DropTarget(playlistManager.getPlaylistPanel(), new DropTargetAdapter() {
-
+    public DropTarget addMusicByDropTarget(){
+        DropTarget addMusicDropTarget = new DropTarget(playlistManager.getPlaylistPanel(), new DropTargetAdapter() {
 
             public void drop(DropTargetDropEvent dtde) {
                 try {
@@ -281,7 +259,7 @@ public class ListenerController implements ListenerControllerInterface{
     public void playButton(JLabel durationLabel){
         if(music.isPlaying()){//pause
             pause = true;
-            music.pausePlayblack();
+            music.pausePlayback();
         }
         else {//play
             String selectedPlaylistName = (String) playlistManager.getMainList().getSelectedValue();///////////////////
@@ -322,7 +300,7 @@ public class ListenerController implements ListenerControllerInterface{
 
     public void skipMusic(int nextOrPrevious, JLabel durationLabel){
         pause = true;
-        music.pausePlayblack();
+        music.pausePlayback();
 
         String selectedPlaylistName = (String) playlistManager.getMainList().getSelectedValue();///////////////////////
         Playlist selectedPlaylist = playlistManager.getMap().get(selectedPlaylistName);///////////////////////

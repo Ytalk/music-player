@@ -38,12 +38,16 @@ public class PlaybackManager implements Runnable {
     private Timer frameTimer;
 
     private int currentFrame = 0; // Current frame position within the audio file
-    private JProgressBar progressBar; // Adiciona uma barra de progresso
     private double duration;
     private String formatDuration;
-    private JLabel progressLabel;
 
     private Thread playbackThread;
+    private ProgressListener progressListener;
+
+
+    public void setProgressListener(ProgressListener listener) {
+        this.progressListener = listener;
+    }
 
     public synchronized void startPlayback() {
         playbackThread = new Thread(this);
@@ -61,7 +65,7 @@ public class PlaybackManager implements Runnable {
         }
     }
 
-    public PlaybackManager(JProgressBar progressBar, JLabel progressLabel) {
+    /*public PlaybackManager(JProgressBar progressBar, JLabel progressLabel) {
         this.progressBar = progressBar;
         this.progressLabel = progressLabel;
 
@@ -79,7 +83,7 @@ public class PlaybackManager implements Runnable {
 
                 if (isPlaying()) {
                     System.out.println("pausa, encerra thread e inicia uma nova...");
-                    pausePlayblack();
+                    pausePlayback();
                     stopPlayback();
                     //frameTimer.stop();/////////////////
                     startPlayback();
@@ -89,7 +93,7 @@ public class PlaybackManager implements Runnable {
             }
         });
 
-    }
+    }*/
 
 
     /**
@@ -200,7 +204,7 @@ public class PlaybackManager implements Runnable {
     /**
      * Stops playback of the audio file.
      */
-    public void pausePlayblack() {
+    public void pausePlayback() {
         if (playing) {
             player.close();
             frameTimer.stop();
@@ -262,11 +266,17 @@ public class PlaybackManager implements Runnable {
 
             int minutes = (int) (progressSeconds / 60);
             int seconds = (int) (progressSeconds % 60);
-            progressLabel.setText( String.format("%02d:%02d", minutes, seconds) );
+            //progressLabel.setText( String.format("%02d:%02d", minutes, seconds) );////////////////////
+            String formattedProgressText = String.format("%02d:%02d", minutes, seconds);
 
             //calculate the progress as a percentage relative to the total duration
-            double progress = (progressSeconds / duration) * 100;
-            progressBar.setValue((int) progress);
+            double progressBarValue = (progressSeconds / duration) * 100;
+            //progressBar.setValue((int) progressBarValue);////////////////////////////
+
+            //notifica o Controller sobre a atualização
+            if (progressListener != null) {
+                progressListener.onProgressUpdate((int) progressBarValue, formattedProgressText);
+            }
         });
         frameTimer.start();
     }
@@ -275,10 +285,18 @@ public class PlaybackManager implements Runnable {
     /**
      * Resets the frame counter, progress bar and progress label to zero.
      */
-    public void resetPlayback() {
+    /*public void resetPlayback() {
         currentFrame = 0;
         progressBar.setValue(0);
         progressLabel.setText("00:00");
+    }*/
+    public void resetPlayback() {
+        currentFrame = 0;
+
+        //notifica o Controller para atualizar a View
+        if (progressListener != null) {
+            progressListener.onProgressUpdate(0, "00:00");
+        }
     }
 
 

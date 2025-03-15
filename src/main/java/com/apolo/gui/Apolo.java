@@ -2,21 +2,8 @@ package com.apolo.gui;
 
 import com.apolo.controller.ListenerController;
 import com.apolo.controller.ListenerControllerInterface;
-import com.apolo.model.Playlist;
-import com.apolo.model.PlaylistManager;
-import com.apolo.model.PlaybackManager;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import java.net.URL;
 
 import java.awt.Color;
-import java.awt.Image;
-import java.awt.CardLayout;
 import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.Dimension;
@@ -25,32 +12,19 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 import javax.swing.ImageIcon;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DnDConstants;
-import java.awt.datatransfer.DataFlavor;
 
 
 public class Apolo extends JFrame {
 
-    private ListenerControllerInterface listenerController = new ListenerController();
-    /*private JPanel playlistPanel;
-    private PlaylistManager playlistManager;
-    private JList mainList;
-    private CardLayout cardLayout;
-    private Map<String, Playlist> playlists;//stores Playlist instances*/
+    private JProgressBar progressBar = new JProgressBar(0, 100);
+    private JLabel durationLabel = new JLabel( "00:00" );
+    private JLabel progressLabel = new JLabel( "00:00" );
 
+    private ListenerControllerInterface listenerController = new ListenerController(progressBar, progressLabel);
 
     private JButton repeatButton = listenerController.formatButton( listenerController.getIcon("/icons/repeat-song-512.png", 23, 23), 64, false );
 
@@ -65,13 +39,6 @@ public class Apolo extends JFrame {
     private JButton delMusicButton = listenerController.formatButton(delIcon, 0, true);
     private JButton createPlaylistButton = listenerController.formatButton(addIcon, 0, true);
     private JButton deletePlaylistButton = listenerController.formatButton(delIcon, 0, true);
-
-
-    //private JProgressBar progressBar = new JProgressBar(0, 100);
-    private JProgressBar progressBar = listenerController.getProgressBar();
-    private JLabel durationLabel = new JLabel( "00:00" );
-    //private JLabel progressLabel = new JLabel( "00:00" );
-    private JLabel progressLabel = listenerController.getProgressLabel();
 
 
     public Apolo(){
@@ -134,9 +101,9 @@ public class Apolo extends JFrame {
             }
         });
 
-        ////////////////////////////////////
+
         listenerController.getPlaylistManager().getMainListPanel().setBounds(20, 20, 245, 400);//Position and size of the panel with playlists
-        add(listenerController.getPlaylistManager().getMainListPanel());//////////////////////////////////
+        add(listenerController.getPlaylistManager().getMainListPanel());
 
 
         //listener to switch between playlists
