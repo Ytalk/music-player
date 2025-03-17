@@ -30,7 +30,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DnDConstants;
 import java.awt.datatransfer.DataFlavor;
 
-public class ListenerController implements ListenerControllerInterface{
+public class ListenerController {
     private PlaylistManager playlistManager;
     private Playlist playlist;
 
@@ -47,6 +47,7 @@ public class ListenerController implements ListenerControllerInterface{
     private RepeatState currentRepeatState = RepeatState.INACTIVE;
     private int counterRepeatOnce = 0;
 
+
     public ListenerController(JProgressBar progressBar, JLabel progressLabel){
         this.progressBar = progressBar;
         this.progressLabel = progressLabel;
@@ -58,6 +59,7 @@ public class ListenerController implements ListenerControllerInterface{
         });
     }
 
+
     public PlaybackManager getMusic() {
         return music;
     }
@@ -66,14 +68,37 @@ public class ListenerController implements ListenerControllerInterface{
         return playlistManager;
     }
 
-    public JProgressBar getProgressBar() {
-        return progressBar;
-    }
 
-    public JLabel getProgressLabel() {
-        return progressLabel;
-    }
+    public void setPlaybackPositionn(int mouseX) {
+        int progressBarVal = (int) Math.round(((double) mouseX / progressBar.getWidth()) * progressBar.getMaximum());
 
+        progressBar.setValue(progressBarVal);
+
+        // Converte para progresso normalizado (0.0 - 1.0)
+        double newProgress = (progressBarVal / 100.0) * music.getDuration();
+
+        // Atualiza o PlaybackManager
+        music.setPlaybackPosition(newProgress);
+
+
+        if (music.isPlaying()) {
+            System.out.println("pausa, encerra thread e inicia uma nova...");
+            pause = true;
+            music.pausePlayback();
+            music.stopPlayback();
+
+            // Espera um curto período antes de reiniciar a música para evitar conflito de estados.
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            music.startPlayback();
+            pause = false;
+        }
+
+    }
 
 
     private boolean noPlaylistsByte = false;
@@ -88,7 +113,6 @@ public class ListenerController implements ListenerControllerInterface{
             noPlaylistsByte = true;
         }
     }
-
 
     public void getMusicDirectory() {
         if (noPlaylistsByte) {
@@ -125,7 +149,7 @@ public class ListenerController implements ListenerControllerInterface{
                 return;
             }
 
-            Playlist playlist = new Playlist("Music");//o erro está aqui pq Apolo acessa diretamanete o que está em PM, e não oq ta aq. mude tudo para aq p/ acesso direto a PM
+            Playlist playlist = new Playlist("Music");
             playlistManager.getMap().put("Music", playlist);
             playlistManager.getMainList().setListData(playlistManager.getMap().keySet().toArray(new String[0]));
             playlistManager.getMainList().setSelectedIndex(0);
@@ -136,7 +160,6 @@ public class ListenerController implements ListenerControllerInterface{
             }
         }
     }
-
 
 
     public ImageIcon getIcon(String pathIcon, int width, int height){
@@ -154,11 +177,6 @@ public class ListenerController implements ListenerControllerInterface{
         bnt.setContentAreaFilled(bool);
         return bnt;
     }
-
-
-
-
-
 
 
     public void addMisicByButton(){
@@ -214,6 +232,7 @@ public class ListenerController implements ListenerControllerInterface{
         }
     }
 
+
     public DropTarget addMusicByDropTarget(){
         DropTarget addMusicDropTarget = new DropTarget(playlistManager.getPlaylistPanel(), new DropTargetAdapter() {
 
@@ -256,7 +275,7 @@ public class ListenerController implements ListenerControllerInterface{
     }
 
 
-    public void playButton(JLabel durationLabel){
+    public void playButton(){
         if(music.isPlaying()){//pause
             pause = true;
             music.pausePlayback();
@@ -286,7 +305,7 @@ public class ListenerController implements ListenerControllerInterface{
 
                     music.resetPlayback();
                     music.setMusic(music_path);
-                    durationLabel.setText( music.getFormatDuration() );
+                    //durationLabel.setText( music.getFormatDuration() );
 
                     music.startPlayback();
                 }
@@ -298,7 +317,12 @@ public class ListenerController implements ListenerControllerInterface{
     }
 
 
-    public void skipMusic(int nextOrPrevious, JLabel durationLabel){
+    public String getMusicDuration(){
+        return music.getFormatDuration();
+    }
+
+
+    public void skipMusic(int nextOrPrevious){
         pause = true;
         music.pausePlayback();
 
@@ -320,7 +344,7 @@ public class ListenerController implements ListenerControllerInterface{
                 pause = false;
 
                 music.setMusic(file_path);
-                durationLabel.setText( music.getFormatDuration() );
+                //durationLabel.setText( music.getFormatDuration() );
 
                 musicThread = new Thread(music);
                 musicThread.start();
@@ -339,8 +363,6 @@ public class ListenerController implements ListenerControllerInterface{
             ex.showMessage();
         }
     }
-
-
 
 
     public void toggleRepeatState(JButton repeatButton) {
@@ -363,7 +385,7 @@ public class ListenerController implements ListenerControllerInterface{
     }
 
 
-    public void handleMusicChange(JButton playButton, JLabel durationLabel) {
+    public void handleMusicChange(JButton playButton) {
         if (music.isPlaying()) {
             playButton.setIcon(getIcon("/icons/48_circle_pause_icon.png", 43, 43));
         }
@@ -375,42 +397,42 @@ public class ListenerController implements ListenerControllerInterface{
                 Playlist selectedPlaylist = playlistManager.getMap().get(selectedPlaylistName);////////////////////////
 
                 if (selectedPlaylist != null) {
-                    handlePlaybackState(selectedPlaylist, durationLabel);
+                    handlePlaybackState(selectedPlaylist);
                 }
             }
 
         }
     }
 
-    private void handlePlaybackState(Playlist selectedPlaylist, JLabel durationLabel) {
+    private void handlePlaybackState(Playlist selectedPlaylist) {
         int playlistSize = selectedPlaylist.getMp3List().getModel().getSize();
         int currentIndex = selectedPlaylist.getMp3List().getSelectedIndex();
 
         switch (currentRepeatState) {
             case INACTIVE:
                 if (currentIndex < playlistSize - 1) {
-                    skipMusic(1, durationLabel);
+                    skipMusic(1);
                 }
                 break;
 
             case REPEAT:
-                playButton(durationLabel);
+                playButton();
                 break;
 
             case REPEAT_ONCE:
-                handleRepeatOnce(playlistSize, currentIndex, durationLabel);
+                handleRepeatOnce(playlistSize, currentIndex);
                 break;
         }
     }
 
 
-    private void handleRepeatOnce(int playlistSize, int currentIndex, JLabel durationLabel) {
+    private void handleRepeatOnce(int playlistSize, int currentIndex) {
         if (counterRepeatOnce < 1) {
-            playButton(durationLabel);
+            playButton();
             counterRepeatOnce++;
         } else {
             if (currentIndex < playlistSize - 1) {
-                skipMusic(1, durationLabel);
+                skipMusic(1);
             }
             counterRepeatOnce = 0;
         }

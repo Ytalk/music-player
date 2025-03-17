@@ -1,7 +1,6 @@
 package com.apolo.gui;
 
 import com.apolo.controller.ListenerController;
-import com.apolo.controller.ListenerControllerInterface;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -24,7 +23,7 @@ public class Apolo extends JFrame {
     private JLabel durationLabel = new JLabel( "00:00" );
     private JLabel progressLabel = new JLabel( "00:00" );
 
-    private ListenerControllerInterface listenerController = new ListenerController(progressBar, progressLabel);
+    private ListenerController listenerController = new ListenerController(progressBar, progressLabel);
 
     private JButton repeatButton = listenerController.formatButton( listenerController.getIcon("/icons/repeat-song-512.png", 23, 23), 64, false );
 
@@ -135,7 +134,8 @@ public class Apolo extends JFrame {
         });
 
         playButton.addActionListener(e -> {
-            listenerController.playButton(durationLabel);
+            listenerController.playButton();
+            durationLabel.setText( listenerController.getMusicDuration() );
         });
 
 
@@ -162,7 +162,8 @@ public class Apolo extends JFrame {
         });
 
         previousButton.addActionListener(e -> {
-            listenerController.skipMusic(-1, durationLabel);
+            listenerController.skipMusic(-1);
+            durationLabel.setText( listenerController.getMusicDuration() );
         });
 
 
@@ -189,15 +190,15 @@ public class Apolo extends JFrame {
         });
 
         nextButton.addActionListener( e -> {
-            listenerController.skipMusic(1, durationLabel);
+            listenerController.skipMusic(1);
+            durationLabel.setText( listenerController.getMusicDuration() );
         });
-
 
 
         listenerController.getMusic().addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
-            listenerController.handleMusicChange(playButton, durationLabel);
+            listenerController.handleMusicChange(playButton);
+            durationLabel.setText( listenerController.getMusicDuration() );
         });
-
 
 
         repeatButton.addActionListener(e -> {
@@ -226,6 +227,13 @@ public class Apolo extends JFrame {
         playbackControlBackground.setBounds(67, 16, 400, 70);
         playbackPanel.add(playbackControlBackground);
 
+
+        progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                listenerController.setPlaybackPositionn(evt.getX());
+            }
+        });
 
         progressBar.setBounds(40, 4, 450, 5);
         progressBar.setForeground( new Color(129, 13, 175) );

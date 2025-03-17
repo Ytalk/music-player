@@ -9,8 +9,6 @@ import java.io.File;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
 import javax.swing.Timer;
 
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -42,11 +40,19 @@ public class PlaybackManager implements Runnable {
     private String formatDuration;
 
     private Thread playbackThread;
-    private ProgressListener progressListener;
+    private ProgressListener progressListener;//barra e tempo
 
+
+    public double getDuration(){
+        return duration;
+    }
 
     public void setProgressListener(ProgressListener listener) {
         this.progressListener = listener;
+    }
+
+    public void setPlaybackPosition(double newProgress) {
+        currentFrame = (int) (newProgress * 45); // 45 frames por segundo
     }
 
     public synchronized void startPlayback() {
@@ -64,36 +70,6 @@ public class PlaybackManager implements Runnable {
             }
         }
     }
-
-    /*public PlaybackManager(JProgressBar progressBar, JLabel progressLabel) {
-        this.progressBar = progressBar;
-        this.progressLabel = progressLabel;
-
-        //listener para permitir arrastar a barra de progresso
-        progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                int mouseX = evt.getX();
-                int progressBarVal = (int) Math.round(((double) mouseX / progressBar.getWidth()) * progressBar.getMaximum());
-
-                progressBar.setValue(progressBarVal);
-
-                double newProgress = (progressBarVal / 100.0) * duration;
-                currentFrame = (int) (newProgress * 45); //45 frames por segundo
-
-                if (isPlaying()) {
-                    System.out.println("pausa, encerra thread e inicia uma nova...");
-                    pausePlayback();
-                    stopPlayback();
-                    //frameTimer.stop();/////////////////
-                    startPlayback();
-                }
-
-                progressBar.setValue(progressBarVal);
-            }
-        });
-
-    }*/
 
 
     /**
@@ -266,12 +242,10 @@ public class PlaybackManager implements Runnable {
 
             int minutes = (int) (progressSeconds / 60);
             int seconds = (int) (progressSeconds % 60);
-            //progressLabel.setText( String.format("%02d:%02d", minutes, seconds) );////////////////////
             String formattedProgressText = String.format("%02d:%02d", minutes, seconds);
 
             //calculate the progress as a percentage relative to the total duration
             double progressBarValue = (progressSeconds / duration) * 100;
-            //progressBar.setValue((int) progressBarValue);////////////////////////////
 
             //notifica o Controller sobre a atualização
             if (progressListener != null) {
@@ -285,11 +259,6 @@ public class PlaybackManager implements Runnable {
     /**
      * Resets the frame counter, progress bar and progress label to zero.
      */
-    /*public void resetPlayback() {
-        currentFrame = 0;
-        progressBar.setValue(0);
-        progressLabel.setText("00:00");
-    }*/
     public void resetPlayback() {
         currentFrame = 0;
 
