@@ -51,8 +51,8 @@ public class PlaybackManager implements Runnable {
         this.progressListener = listener;
     }
 
-    public void setPlaybackPosition(double newProgress) {
-        currentFrame = (int) (newProgress * 45); // 45 frames por segundo
+    public void setPlaybackFrame(double newTime) {
+        currentFrame = (int) (newTime * 45); //45 frames per second
     }
 
     public synchronized void startPlayback() {
