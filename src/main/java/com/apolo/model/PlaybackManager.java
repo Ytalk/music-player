@@ -1,7 +1,5 @@
 package com.apolo.model;
 
-import com.apolo.gui.MusicException;
-
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,7 +58,7 @@ public class PlaybackManager implements Runnable {
         playbackThread.start();
     }
 
-    public synchronized void stopPlayback() {
+    public synchronized void stopPlayback() {/////////////////////////////////////////////////////////
         if(playbackThread != null && playbackThread.isAlive()) {
             playbackThread.interrupt();
             try {
@@ -81,7 +79,7 @@ public class PlaybackManager implements Runnable {
     public void setMusic(String filePath) throws MusicException {
         //check if the file path is null
         if (filePath == null) {
-            throw new MusicException("Select a song first", "Null path");
+            throw new MusicException("Select a song first", "Null Path");
         }
 
         //create a File object from the provided file path
@@ -95,14 +93,13 @@ public class PlaybackManager implements Runnable {
         duration = getMP3Duration(filePath);
 
         try {
-            //create a FileInputStream and wrap it in a BufferedInputStream
-            FileInputStream fileInputStream = new FileInputStream(file);
+            FileInputStream fileInputStream = new FileInputStream(file);//create a FileInputStream and wrap it in a BufferedInputStream
             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
-            //initialize the AdvancedPlayer with the BufferedInputStream
-            this.player = new AdvancedPlayer(bufferedInputStream);
-        } catch (JavaLayerException | IOException e) {
-            e.printStackTrace();
+            this.player = new AdvancedPlayer(bufferedInputStream);//initialize the AdvancedPlayer with the BufferedInputStream
+        } catch (IOException e) {
+            throw new MusicException("Error opening file: " + e.getMessage(), "File Error");
+        } catch (JavaLayerException e) {
+            throw new MusicException("Error initializing player: " + e.getMessage(), "Player Error");
         }
     }
 
@@ -148,32 +145,33 @@ public class PlaybackManager implements Runnable {
     /**
      * Starts playback of the audio file.
      */
-    private void playPlayback() {
+    private void playPlayback() throws MusicException {
+        //set up a playback listener to handle playback events
+        player.setPlayBackListener(new PlaybackListener() {
+            @Override
+            public void playbackFinished(PlaybackEvent evt) {
+            player.close();
+            frameTimer.stop();
+            resetPlayback();
+
+            System.out.println("Playback complete!");
+
+            playing = false;
+            fireStateChanged();
+            }
+        });
+
+        System.out.println("Playback started!");
+
+        playing = true; //mark as playing
+        fireStateChanged(); //notify listeners of state change
+
+        startProgressWatcher();
+
         try {
-            //set up a playback listener to handle playback events
-            player.setPlayBackListener(new PlaybackListener() {
-                @Override
-                public void playbackFinished(PlaybackEvent evt) {
-                player.close();
-                frameTimer.stop();
-                resetPlayback();
-
-                System.out.println("Playback complete!");
-
-                playing = false;
-                fireStateChanged();
-                }
-            });
-
-            System.out.println("Playback started!");
-
-            playing = true; //mark as playing
-            fireStateChanged(); //notify listeners of state change
-
-            startProgressWatcher();
             player.play(); //start playback
         } catch (JavaLayerException e) {
-            e.printStackTrace();
+            throw new MusicException("Error during playback: " + e.getMessage(), "Playback Error");
         }
     }
 
@@ -195,39 +193,45 @@ public class PlaybackManager implements Runnable {
     /**
      * Resumes playback from the last paused position.
      */
-    private void resumePlayback() {
-        try {
-            //create a new FileInputStream and wrap it in a BufferedInputStream
+    private void resumePlayback() throws MusicException {
+        try { //create a new FileInputStream and wrap it in a BufferedInputStream
             FileInputStream fileInputStream = new FileInputStream(file);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
             this.player = new AdvancedPlayer(bufferedInputStream);
-
-            //set up a playback listener to handle playback events
-            player.setPlayBackListener(new PlaybackListener() {
-                @Override
-                public void playbackFinished(PlaybackEvent evt) {
-                    player.close();
-                    frameTimer.stop();
-                    resetPlayback();
-
-                    System.out.println("Playback complete!");
-
-                    playing = false;
-                    fireStateChanged();
-                }
-            });
-
-            System.out.println("Resumed playback");
-
-            playing = true;
-            fireStateChanged();
-
-            startProgressWatcher();
-            player.play(currentFrame, Integer.MAX_VALUE);
-
-        } catch (JavaLayerException | IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new MusicException("Error opening file: " + e.getMessage(), "File Error");
+        } catch (JavaLayerException e) {
+            throw new MusicException("Error initializing player: " + e.getMessage(), "Player Error");
         }
+
+        //set up a playback listener to handle playback events
+        player.setPlayBackListener(new PlaybackListener() {
+            @Override
+            public void playbackFinished(PlaybackEvent evt) {
+                player.close();
+                frameTimer.stop();
+                resetPlayback();
+
+                System.out.println("Playback complete!");
+
+                playing = false;
+                fireStateChanged();
+            }
+        });
+
+        System.out.println("Resumed playback");
+
+        playing = true;
+        fireStateChanged();
+
+        startProgressWatcher();
+
+        try {
+            player.play(currentFrame, Integer.MAX_VALUE);
+        } catch (JavaLayerException e) {
+            throw new MusicException("Error resuming playback: " + e.getMessage(), "Playback Error");
+        }
+
     }
 
 
@@ -275,7 +279,7 @@ public class PlaybackManager implements Runnable {
      * @param filePath The path to the MP3 audio file.
      * @return The duration of the audio file in seconds.
      */
-    private double getMP3Duration(String filePath) {
+    private double getMP3Duration(String filePath) {////////////////////////////////////////////
         try {
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
             int trackLength = audioFile.getAudioHeader().getTrackLength();//track duration in seconds

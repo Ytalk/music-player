@@ -5,7 +5,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.apolo.gui.MusicException;
+import com.apolo.gui.ApoloPopUp;
+import com.apolo.model.MusicException;
 import com.apolo.model.Playlist;
 import com.apolo.model.PlaylistManager;
 
@@ -32,7 +33,7 @@ public class PlaylistController {
 
     public void getPlaylists() {
         playlistManager = new PlaylistManager();
-        playlistManager.loadFile();
+        playlistManager.loadFile();////////////////////////////////////////////
         if (playlistManager.getManager() != null) {
             playlistManager = playlistManager.getManager();
         }
@@ -117,11 +118,11 @@ public class PlaylistController {
                     playlist.getListModel().addElement( file.getAbsolutePath() );
                 }
 
-                playlistManager.saveToFile(playlistManager);
+                playlistManager.saveToFile(playlistManager);//////////////////////////
             }
 
         } catch (MusicException ex) {
-            ex.showMessage();
+            new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
         }
     }
 
@@ -141,11 +142,11 @@ public class PlaylistController {
             int confirmSongDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the selected music?", "Confirm Song Deletion", JOptionPane.YES_NO_OPTION);
             if (confirmSongDel == JOptionPane.YES_OPTION) {
                 playlist.getListModel().remove(selectedMusicPathIndex);
-                playlistManager.saveToFile(playlistManager);
+                playlistManager.saveToFile(playlistManager);////////////////////////////////////////
             }
         }
         catch (MusicException ex){
-            ex.showMessage();
+            new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
         }
     }
 
@@ -171,13 +172,13 @@ public class PlaylistController {
                             playlist.getListModel().addElement( file.getAbsolutePath() );
                         }
                         dtde.dropComplete(true);
-                        playlistManager.saveToFile(playlistManager);
+                        playlistManager.saveToFile(playlistManager);/////////////////////
                     } else {
                         dtde.rejectDrop();
                     }
                 }
-                catch (MusicException e) {
-                    e.showMessage();
+                catch (MusicException ex) {
+                    new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
                     dtde.dropComplete(false);
                 }
                 catch (Exception e) {

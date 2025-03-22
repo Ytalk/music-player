@@ -1,6 +1,6 @@
 package com.apolo.model;
 
-import com.apolo.gui.MusicException;
+import com.apolo.gui.ApoloListCellRenderer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,14 +18,12 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.BorderLayout;
-import java.awt.Component;
 
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
 
@@ -82,7 +80,7 @@ public class PlaylistManager implements Serializable {
      * Adds the playlist to the manager and updates the UI accordingly.
      * @return The created playlist object.
      */
-    public void createPlaylist() {
+    public void createPlaylist() throws MusicException{
         String playlistName;
         while (true) {
             playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
@@ -94,9 +92,9 @@ public class PlaylistManager implements Serializable {
             playlistName = playlistName.trim();
 
             if (playlistName.length() < 1 || playlistName.length() > 20) {
-                JOptionPane.showMessageDialog(null, "Playlist name must be between 1 and 20 characters.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
+                throw new MusicException("Playlist name must be between 1 and 20 characters.", "Invalid Name");
             } else if (playlists.containsKey(playlistName)) {
-                JOptionPane.showMessageDialog(null, "Playlist with this name already exists. Please choose a different name.", "Duplicate Name", JOptionPane.ERROR_MESSAGE);
+                throw new MusicException("Playlist with this name already exists. Please choose a different name.", "Duplicate Name");
             } else {
                 Playlist playlist = new Playlist(playlistName);
                 playlists.put(playlistName, playlist);
@@ -136,7 +134,7 @@ public class PlaylistManager implements Serializable {
                 playlistPanel.remove(playlist.getPlaylist());
             }
 
-            pm.saveToFile(pm);
+            //pm.saveToFile(pm);//////////////////////
         }
 
     }
@@ -187,15 +185,13 @@ public class PlaylistManager implements Serializable {
      * Saves the current state of the PlaylistManager to a file.
      * @param pm The PlaylistManager instance to be saved.
      */
-    public void saveToFile(PlaylistManager pm){
+    public void saveToFile(PlaylistManager pm) throws MusicException{
         manager = pm;
-
-        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("playlists.byte"))){//cria OOS para escrever. FOS abre arquivo para para escrever bytes
+        //try-with-resources. cria OOS para escrever. FOS abre arquivo para para escrever bytes
+        try(ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream("playlists.byte"))){
             writer.writeObject(manager);
-        }
-        catch(IOException e){
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error saving file: " + e.getMessage(), "Saving Error", JOptionPane.ERROR_MESSAGE);
+        } catch(IOException e){
+            throw new MusicException("Error saving file: " + e.getMessage(), "Saving Error");
         }
     }
 
@@ -203,15 +199,15 @@ public class PlaylistManager implements Serializable {
     /**
      * Loads the saved state of the PlaylistManager from a file.
      */
-    public void loadFile(){
+    public void loadFile() throws MusicException{////////////////////////////////
         try(ObjectInputStream reader = new ObjectInputStream(new FileInputStream("playlists.byte"))){//cria OIS para ler objetos do arquivo
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
         }
         catch (FileNotFoundException e){
-            //JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
         }
         catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Something went wrong loading the playlists!", JOptionPane.ERROR_MESSAGE);
+            throw new MusicException(e.getMessage(), "Something went wrong loading the playlists!");
         }
     }
 
@@ -222,41 +218,6 @@ public class PlaylistManager implements Serializable {
      */
     public PlaylistManager getManager(){
         return manager;
-    }
-
-
-    /**
-     * Custom list cell renderer for displaying elements in a JList (mainList) with alternating background colors.
-     * Background color alternates between two colors for better visual distinction.
-     */
-    public class ApoloListCellRenderer extends DefaultListCellRenderer  implements Serializable{
-        private static final long serialVersionUID = 6L;
-
-        /**
-         * Overrides the getListCellRendererComponent method to customize the appearance of list cells.
-         *
-         * @param list           The JList object being rendered.
-         * @param value          The value to be rendered.
-         * @param index          The index of the value in the list.
-         * @param isSelected     True if the cell is selected, false otherwise.
-         * @param cellHasFocus   True if the cell has focus, false otherwise.
-         * @return A component representing the rendered cell.
-         */
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (isSelected) {
-                setBackground(new Color(129, 13, 175));
-                setForeground(Color.BLACK);
-            }
-            else {
-                setBackground(index % 2 == 0 ? new Color(64, 64, 64) : new Color(40, 40, 40));
-                setForeground(Color.BLACK);
-            }
-
-            return this;
-        }
     }
 
 }

@@ -2,6 +2,7 @@ package com.apolo.gui;
 
 import com.apolo.controller.PlaybackController;
 import com.apolo.controller.PlaylistController;
+import com.apolo.model.MusicException;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -79,7 +80,12 @@ public class Apolo extends JFrame {
         createPlaylistButton.setBounds(218, 22, 20, 20);
 
         createPlaylistButton.addActionListener(e -> {
-            playlistController.getPlaylistManager().createPlaylist();/////////////////////////////////
+            try {
+                playlistController.getPlaylistManager().createPlaylist();/////////////////////////////////
+            }
+            catch (MusicException ex){
+                new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
+            }
 
             if(playlistController.getPlaylistManager().getMainList().getModel().getSize() == 1) {////////////////////
                 playlistController.getPlaylistManager().getPlaylistPanel().revalidate();///////////////////
@@ -96,9 +102,10 @@ public class Apolo extends JFrame {
         deletePlaylistButton.addActionListener(e -> {
             try {
                 playlistController.getPlaylistManager().deletePlaylist( playlistController.getPlaylistManager() );/////////////////////////
+                playlistController.getPlaylistManager().getManager().saveToFile( playlistController.getPlaylistManager() );
             }
             catch (MusicException ex){
-                ex.showMessage();
+                new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
             }
         });
 
@@ -136,7 +143,7 @@ public class Apolo extends JFrame {
         });
 
         playButton.addActionListener(e -> {
-            playbackController.playButton( playlistController.getSelectedPlaylist() );
+            playbackController.playMusic( playlistController.getSelectedPlaylist() );
             durationLabel.setText( playbackController.getMusicDuration() );
         });
 
