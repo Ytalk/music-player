@@ -75,37 +75,33 @@ public class PlaylistManager implements Serializable {
         mainListPanel.add(scrollPlaylists, BorderLayout.CENTER);
     }
 
+
     /**
      * Creates a new playlist with the specified name.
      * Adds the playlist to the manager and updates the UI accordingly.
      * @return The created playlist object.
      */
-    public void createPlaylist() throws MusicException{
-        String playlistName;
-        while (true) {
-            playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
-
-            if (playlistName == null) {
-                return;
-            }
-
-            playlistName = playlistName.trim();
-
-            if (playlistName.length() < 1 || playlistName.length() > 20) {
-                throw new MusicException("Playlist name must be between 1 and 20 characters.", "Invalid Name");
-            } else if (playlists.containsKey(playlistName)) {
-                throw new MusicException("Playlist with this name already exists. Please choose a different name.", "Duplicate Name");
-            } else {
-                Playlist playlist = new Playlist(playlistName);
-                playlists.put(playlistName, playlist);
-
-                mainList.setListData(playlists.keySet().toArray(new String[0]));
-                playlistPanel.add(playlist.getPlaylist(), playlistName);
-                //mainList.setSelectedIndex(0);
-                return;
-            }
-
+    public void createPlaylist(String playlistName) throws MusicException {
+        if (playlistName == null) {
+            return;
         }
+
+        playlistName = playlistName.trim();
+
+        if (playlistName.length() < 1 || playlistName.length() > 20) {
+            throw new MusicException("Playlist name must be between 1 and 20 characters.", "Invalid Name");
+        }
+
+        if (playlists.containsKey(playlistName)) {
+            throw new MusicException("Playlist with this name already exists.", "Duplicate Name");
+        }
+
+        Playlist playlist = new Playlist(playlistName);
+        playlists.put(playlistName, playlist);
+
+        //atualiza view
+        mainList.setListData(playlists.keySet().toArray(new String[0]));
+        playlistPanel.add(playlist.getPlaylist(), playlistName);
     }
 
 
@@ -115,28 +111,20 @@ public class PlaylistManager implements Serializable {
      * @param pm The playlist manager instance.
      * @throws MusicException If no playlist is selected for deletion.
      */
-    public void deletePlaylist(PlaylistManager pm) throws MusicException{
-        String selectedPlaylistName = mainList.getSelectedValue();
-        Playlist playlist = playlists.get(selectedPlaylistName);
-
-        if (playlist == null) {
+    public void deletePlaylist(String playlistName) throws MusicException {
+        if (!playlists.containsKey(playlistName)) {
             throw new MusicException("Select a playlist before deleting!", "Null Playlist");
         }
-
-        int confirmPlaylistDel = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete the " + selectedPlaylistName + " playlist?", "Confirm Playlist Deletion", JOptionPane.YES_NO_OPTION);
-        if (confirmPlaylistDel == JOptionPane.YES_OPTION) {
-            playlists.remove(selectedPlaylistName);
-            mainList.setListData(playlists.keySet().toArray(new String[0]));
-
-            if (!playlists.isEmpty()) {
-                mainList.setSelectedIndex(0);
-            } else{
-                playlistPanel.remove(playlist.getPlaylist());
-            }
-
-            //pm.saveToFile(pm);//////////////////////
+        playlists.remove(playlistName);
+        //atualiza view
+        mainList.setListData(playlists.keySet().toArray(new String[0]));
+        if (!playlists.isEmpty()) {
+            mainList.setSelectedIndex(0);
+        } else {
+            playlistPanel.removeAll();
+            playlistPanel.revalidate();
+            playlistPanel.repaint();
         }
-
     }
 
 

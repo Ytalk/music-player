@@ -1,11 +1,11 @@
 package com.apolo.gui;
 
+import com.apolo.model.MusicMetadata;
+
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
 import java.awt.Component;
-import java.awt.Image;
 import java.awt.Color;
 import java.awt.BorderLayout;
 
@@ -15,16 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.BorderFactory;
-
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.images.Artwork;
 
 /**
  * Custom list cell renderer for displaying music information in a JList with alternating background colors.
@@ -54,14 +44,16 @@ public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer impleme
             String filePath = (String) value;
             String fileName = new File(filePath).getName().replaceFirst("[.][^.]+$", "");
 
-            ImageIcon albumArt = getMP3AlbumArtwork(filePath);
-            String title = getMP3Title(filePath);
-            String duration = getMP3Duration(filePath);
+            MusicMetadata metadata = new MusicMetadata(filePath);
+            ImageIcon albumArt = metadata.getMP3AlbumArtwork();
+            String title = metadata.getMP3Title();
+            String duration = metadata.getMP3Duration();
 
             JPanel infoPanel = new JPanel(new BorderLayout());
             infoPanel.setBackground(musicPanel.getBackground());
 
-            JLabel titleLabel = new JLabel(title != null && !title.isEmpty() ? title : fileName);
+            JLabel titleLabel = new JLabel(metadata.getMP3Title());//*
+            //JLabel titleLabel = new JLabel(title != null && !title.isEmpty() ? title : fileName);
             titleLabel.setForeground(Color.BLACK);
             infoPanel.add(titleLabel, BorderLayout.CENTER);
 
@@ -82,75 +74,6 @@ public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer impleme
 
         musicPanel.setBackground(isSelected ? new Color(129, 13, 175) : musicPanel.getBackground());
         return musicPanel;
-    }
-
-
-    /**
-     * Retrieves the formatted duration of an audio file for display in ApoloTaggerListCellRenderer.
-     *
-     * @param filePath The path to the audio file.
-     * @return The formatted duration of the audio file in "mm:ss" format.
-     */
-    private String getMP3Duration(String filePath) {//////////////////////////
-        try {
-            AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            int trackLength = audioFile.getAudioHeader().getTrackLength();//get the track length in seconds
-
-            int minutes = trackLength / 60;
-            int seconds = trackLength % 60;
-            return String.format("%02d:%02d", minutes, seconds);
-        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException |
-                 InvalidAudioFrameException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    /**
-     * Retrieves the title of an audio file.
-     *
-     * @param filePath The path to the audio file.
-     * @return The title of the audio file.
-     */
-    private String getMP3Title(String filePath) {/////////////////////////////////
-        try {
-            AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            Tag tag = audioFile.getTag();
-            if (tag != null) {
-                return tag.getFirst(FieldKey.TITLE);
-            }
-        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    /**
-     * Retrieves the album artwork of an MP3 audio file.
-     *
-     * @param filePath The path to the MP3 audio file.
-     * @return The album artwork as an ImageIcon, scaled to 30x30 pixels.
-     */
-    private ImageIcon getMP3AlbumArtwork(String filePath) {/////////////////////////
-        try {
-            AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            Tag tag = audioFile.getTag();
-            if (tag != null) {
-                Artwork artwork = tag.getFirstArtwork();
-                if (artwork != null) {
-                    byte[] imageData = artwork.getBinaryData();//retrieve the binary data of the artwork
-                    if (imageData != null) {
-                        //create an ImageIcon from the image data and scale it to 30x30 pixels
-                        return new ImageIcon(new ImageIcon(imageData).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

@@ -33,7 +33,13 @@ public class PlaylistController {
 
     public void getPlaylists() {
         playlistManager = new PlaylistManager();
-        playlistManager.loadFile();////////////////////////////////////////////
+
+        try {
+            playlistManager.loadFile();
+        } catch(MusicException ex){
+            new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+        }
+
         if (playlistManager.getManager() != null) {
             playlistManager = playlistManager.getManager();
         }
@@ -172,7 +178,7 @@ public class PlaylistController {
                             playlist.getListModel().addElement( file.getAbsolutePath() );
                         }
                         dtde.dropComplete(true);
-                        playlistManager.saveToFile(playlistManager);/////////////////////
+                        playlistManager.saveToFile(playlistManager);/////////
                     } else {
                         dtde.rejectDrop();
                     }
@@ -190,6 +196,27 @@ public class PlaylistController {
         });
 
         return addMusicDropTarget;
+    }
+
+
+    public void handleCreatePlaylist(String playlistName) {
+        try {
+            playlistManager.createPlaylist(playlistName);
+        } catch (MusicException ex) {
+            new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
+        }
+    }
+
+    public void handleDeletePlaylist() {
+        try {
+            String selectedPlaylistName = (String) playlistManager.getMainList().getSelectedValue();
+            boolean confirm = new ApoloPopUp().showDeleteConfirmation(selectedPlaylistName);
+            if (confirm) {
+                playlistManager.deletePlaylist(selectedPlaylistName);
+            }
+        } catch (MusicException ex) {
+            new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
+        }
     }
 
 }

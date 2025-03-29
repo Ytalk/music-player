@@ -80,53 +80,47 @@ public class PlaybackController {
     }
 
 
-    public void playMusic(Playlist selectedPlaylist){/////////////////////
+    public void playMusic(Playlist selectedPlaylist){
         if(playbackManager.isPlaying()){//pause
             pause = true;
             playbackManager.pausePlayback();
         }
         else {//play
-            if(selectedPlaylist == null) {
-                try {
+
+            try {
+                if (selectedPlaylist == null)
                     throw new MusicException("Select a playlist first!", "Null Playlist");
-                } catch(MusicException ex){
-                    new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
-                }
-            }
 
-            pause = false;
-            String filePath = selectedPlaylist.getMp3List().getSelectedValue();
+                pause = false;
+                String filePath = selectedPlaylist.getMp3List().getSelectedValue();
 
-            if(filePath == null) {
-                try{
+                if (filePath == null)
                     throw new MusicException("Select a song first!", "Null Music");
-                } catch(MusicException ex){
-                    new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
+
+                if( filePath.equals(musicPath) ) {//resume or repeat without printPath
+                    try {
+                        playbackManager.setMusic(musicPath);
+                        playbackManager.startPlayback();
+                    } catch(MusicException ex){
+                        new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+                    }
                 }
-            }
+                else{//new play
+                    System.out.println(filePath);
+                    musicPath = filePath;
 
-
-            if( filePath.equals(musicPath) ) {//resume or repeat without printPath
-                try {
-                    playbackManager.setMusic(musicPath);
-                    playbackManager.startPlayback();
-                } catch(MusicException ex){
-                    new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+                    playbackManager.resetPlayback();
+                    try {
+                        playbackManager.setMusic(musicPath);
+                        playbackManager.startPlayback();
+                    } catch(MusicException ex){
+                        new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+                    }
                 }
-            }
-            else{//new play
-                System.out.println(filePath);
-                musicPath = filePath;
 
-                playbackManager.resetPlayback();
-                try {
-                    playbackManager.setMusic(musicPath);
-                    playbackManager.startPlayback();
-                } catch(MusicException ex){
-                    new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
-                }
+            } catch(MusicException ex){
+                new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
             }
-
 
         }
     }
@@ -137,48 +131,47 @@ public class PlaybackController {
     }
 
 
-    public void skipMusic(int nextOrPrevious, Playlist selectedPlaylist){/////////////////////////
+    public void skipMusic(int nextOrPrevious, Playlist selectedPlaylist){
         pause = true;
         playbackManager.pausePlayback();
 
-        if ( selectedPlaylist == null ) {
-            try {
+        try {
+            if (selectedPlaylist == null)
                 throw new MusicException("Select a playlist first!", "Null Playlist");
-            } catch(MusicException ex){
-                new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
+
+            int newIndex = selectedPlaylist.getMp3List().getSelectedIndex() + nextOrPrevious;
+            if (newIndex < selectedPlaylist.getMp3List().getModel().getSize() && newIndex >= 0) {
+                String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(newIndex);//next or previous song
+                System.out.println(filePath);
+                selectedPlaylist.getMp3List().setSelectedIndex(newIndex);//changes the JList to the next or previous song
+
+                musicPath = filePath;
+                playbackManager.resetPlayback();
+                pause = false;
+
+                try {
+                    playbackManager.setMusic(filePath);
+                    playbackManager.startPlayback();
+                } catch (MusicException ex) {
+                    new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+                }
+            } else {
+                System.out.println("There are no more songs in the playlist.");
+                String file_path = selectedPlaylist.getMp3List().getSelectedValue();
+
+                playbackManager.resetPlayback();
+                pause = false;
+
+                try {
+                    playbackManager.setMusic(file_path);
+                    playbackManager.startPlayback();
+                } catch (MusicException ex) {
+                    new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
+                }
             }
-        }
 
-        int newIndex = selectedPlaylist.getMp3List().getSelectedIndex() + nextOrPrevious;
-        if (newIndex < selectedPlaylist.getMp3List().getModel().getSize() && newIndex >= 0) {
-            String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(newIndex);//next or previous song
-            System.out.println(filePath);
-            selectedPlaylist.getMp3List().setSelectedIndex(newIndex);//changes the JList to the next or previous song
-
-            musicPath = filePath;
-            playbackManager.resetPlayback();
-            pause = false;
-
-            try {
-                playbackManager.setMusic(filePath);
-                playbackManager.startPlayback();
-            } catch(MusicException ex){
-                new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
-            }
-        }
-        else {
-            System.out.println("There are no more songs in the playlist.");
-            String file_path = selectedPlaylist.getMp3List().getSelectedValue();
-
-            playbackManager.resetPlayback();
-            pause = false;
-
-            try{
-                playbackManager.setMusic(file_path);
-                playbackManager.startPlayback();
-            } catch(MusicException ex){
-                new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
-            }
+        } catch(MusicException ex){
+            new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
         }
 
     }

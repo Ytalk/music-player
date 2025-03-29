@@ -11,12 +11,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JPanel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 
 public class Apolo extends JFrame {
@@ -80,12 +75,10 @@ public class Apolo extends JFrame {
         createPlaylistButton.setBounds(218, 22, 20, 20);
 
         createPlaylistButton.addActionListener(e -> {
-            try {
-                playlistController.getPlaylistManager().createPlaylist();/////////////////////////////////
-            }
-            catch (MusicException ex){
-                new ApoloPopUp().showWarning(ex.getMessage(), ex.getErrorName());
-            }
+
+            String playlistName = JOptionPane.showInputDialog(null, "Enter playlist name (1 to 20 characters):", "New Playlist", JOptionPane.PLAIN_MESSAGE);
+            playlistController.handleCreatePlaylist(playlistName);
+
 
             if(playlistController.getPlaylistManager().getMainList().getModel().getSize() == 1) {////////////////////
                 playlistController.getPlaylistManager().getPlaylistPanel().revalidate();///////////////////
@@ -101,7 +94,7 @@ public class Apolo extends JFrame {
 
         deletePlaylistButton.addActionListener(e -> {
             try {
-                playlistController.getPlaylistManager().deletePlaylist( playlistController.getPlaylistManager() );/////////////////////////
+                playlistController.handleDeletePlaylist();
                 playlistController.getPlaylistManager().getManager().saveToFile( playlistController.getPlaylistManager() );
             }
             catch (MusicException ex){
