@@ -17,7 +17,7 @@
 
 
     <dependencies>
-        <!-- JLayer library to play audios (PlaybackManager) -->
+        <!-- JLayer library to play audios (JLayerAudioPlayer) -->
         <dependency>
             <groupId>javazoom</groupId>
             <artifactId>jlayer</artifactId>
@@ -67,7 +67,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>com.apolo.gui.Apolo</mainClass>
+                    <mainClass>com.apolo.view.Apolo</mainClass>
                 </configuration>
             </plugin>
 
@@ -90,7 +90,7 @@
 
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.apolo.gui.Apolo</mainClass>
+                            <mainClass>com.apolo.view.Apolo</mainClass>
                         </transformer>
                     </transformers>
                 </configuration>
@@ -113,7 +113,7 @@
                             <outfile>target/Harmonic-Apolo.exe</outfile>
                             <jar>target/${artifactId}-${version}-shaded.jar</jar>
                             <classPath>
-                                <mainClass>com.apolo.gui.Apolo</mainClass>
+                                <mainClass>com.apolo.view.Apolo</mainClass>
                             </classPath>
                             <jre>
                                 <path>C:/Dev/Tools/Java/bin</path>

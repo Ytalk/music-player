@@ -1,26 +1,20 @@
 package com.apolo.model;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-
+import com.apolo.model.audio.JLayerAudioPlayer;
+import com.apolo.model.exception.MusicException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.apolo.gui.MusicException;
+import com.apolo.view.MusicException;
 
 public class PlaybackManagerTest {
 
     @InjectMocks
-    private PlaybackManager playbackManager;
+    private JLayerAudioPlayer playbackManager;
 
     @BeforeEach
     public void setUp() {

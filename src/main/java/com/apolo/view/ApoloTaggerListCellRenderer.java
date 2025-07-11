@@ -1,4 +1,4 @@
-package com.apolo.gui;
+package com.apolo.view;
 
 import com.apolo.model.MusicMetadata;
 

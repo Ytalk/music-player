@@ -1,8 +1,11 @@
 package com.apolo.controller;
 
-import com.apolo.gui.ApoloPopUp;
-import com.apolo.model.MusicException;
-import com.apolo.model.PlaybackManager;
+import com.apolo.model.audio.AudioCommandExecutor;
+import com.apolo.model.audio.JLayerAudioPlayer;
+import com.apolo.model.command.AudioCommand;
+import com.apolo.model.command.AudioCommandType;
+import com.apolo.model.exception.MusicException;
+import com.apolo.view.ApoloPopUp;
 import com.apolo.model.Playlist;
 
 import java.net.URL;
@@ -21,11 +24,11 @@ public class PlaybackController {
     private JProgressBar progressBar;
     private JLabel progressLabel;
 
-    private PlaybackManager playbackManager = new PlaybackManager();
-    //private Thread musicThread = new Thread(playbackManager);
+    private JLayerAudioPlayer player = new JLayerAudioPlayer();
+    private AudioCommandExecutor commandExecutor = new AudioCommandExecutor(player);
 
     private boolean pause = true;
-    private String musicPath;
+    private String currentFilePath;
 
     private enum RepeatState { INACTIVE, REPEAT, REPEAT_ONCE }
     private RepeatState currentRepeatState = RepeatState.INACTIVE;
@@ -37,82 +40,62 @@ public class PlaybackController {
         this.progressLabel = progressLabel;
 
         //registra um Listener
-        playbackManager.setProgressListener((progressBarValue, formattedProgressText) -> {
+        player.setProgressListener((progressBarValue, formattedProgressText) -> {////////////////////
             progressBar.setValue(progressBarValue);
             progressLabel.setText(formattedProgressText);
         });
     }
 
 
-    public PlaybackManager getPlaybackManager() {
-        return playbackManager;
+    public JLayerAudioPlayer getJLayerAudioPlayer() {
+        return player;
     }
 
 
-
-
-    public void setPlaybackTime(int mouseX) {///////////////////////////////////////
+    public void setPlaybackTime(int mouseX) {
         int progressBarVal = (int) Math.round(((double) mouseX / progressBar.getWidth()) * progressBar.getMaximum());
 
         progressBar.setValue(progressBarVal);
 
         //creates a new progress time according to the bar percentage and music duration
-        double newTime = (progressBarVal / 100.0) * playbackManager.getDuration();
+        double newTime = (progressBarVal / 100.0) * player.getDuration();
 
-        playbackManager.setPlaybackFrame(newTime); //update frame
-
-        if (playbackManager.isPlaying()) {
-            System.out.println("pausa, encerra thread e inicia uma nova...");
-            pause = true;
-            playbackManager.pausePlayback();
-            playbackManager.stopPlayback();
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            playbackManager.startPlayback();
-            pause = false;
-        }
-
+        pause = true;
+        player.pause();
+        commandExecutor.enqueueCommand( new AudioCommand(AudioCommandType.SEEK, newTime) );
+        pause = false;
     }
 
 
     public void playMusic(Playlist selectedPlaylist){
-        if(playbackManager.isPlaying()){//pause
+        if(player.isPlaying()){//pause
             pause = true;
-            playbackManager.pausePlayback();
+            //commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PAUSE, null ) );
+            player.pause();
         }
-        else {//play
+        else {//run
 
             try {
-                if (selectedPlaylist == null)
-                    throw new MusicException("Select a playlist first!", "Null Playlist");
-
+                //validate
+                if (selectedPlaylist == null) throw new MusicException("Select a playlist first!", "Null Playlist");
                 pause = false;
                 String filePath = selectedPlaylist.getMp3List().getSelectedValue();
+                if (filePath == null) throw new MusicException("Select a song first!", "Null Music");
 
-                if (filePath == null)
-                    throw new MusicException("Select a song first!", "Null Music");
-
-                if( filePath.equals(musicPath) ) {//resume or repeat without printPath
+                if( filePath.equals(currentFilePath) ) {//resume or repeat without printPath
                     try {
-                        playbackManager.setMusic(musicPath);
-                        playbackManager.startPlayback();
+                        commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.RESUME, null ) );
                     } catch(MusicException ex){
                         new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
                     }
                 }
                 else{//new play
                     System.out.println(filePath);
-                    musicPath = filePath;
+                    currentFilePath = filePath;
 
-                    playbackManager.resetPlayback();
                     try {
-                        playbackManager.setMusic(musicPath);
-                        playbackManager.startPlayback();
+                        commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.LOAD_FILE, filePath ) );
+                        commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PLAY, null ) );
                     } catch(MusicException ex){
                         new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
                     }
@@ -127,44 +110,43 @@ public class PlaybackController {
 
 
     public String getMusicDuration(){
-        return playbackManager.getFormatDuration();
+        return player.getFormatDuration();
     }
 
 
     public void skipMusic(int nextOrPrevious, Playlist selectedPlaylist){
         pause = true;
-        playbackManager.pausePlayback();
+        //commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PAUSE, null ) );
+        player.pause();
 
         try {
             if (selectedPlaylist == null)
                 throw new MusicException("Select a playlist first!", "Null Playlist");
 
             int newIndex = selectedPlaylist.getMp3List().getSelectedIndex() + nextOrPrevious;
-            if (newIndex < selectedPlaylist.getMp3List().getModel().getSize() && newIndex >= 0) {
+            if (newIndex < selectedPlaylist.getMp3List().getModel().getSize() && newIndex >= 0) {//skip
                 String filePath = selectedPlaylist.getMp3List().getModel().getElementAt(newIndex);//next or previous song
                 System.out.println(filePath);
                 selectedPlaylist.getMp3List().setSelectedIndex(newIndex);//changes the JList to the next or previous song
 
-                musicPath = filePath;
-                playbackManager.resetPlayback();
+                currentFilePath = filePath;
                 pause = false;
 
                 try {
-                    playbackManager.setMusic(filePath);
-                    playbackManager.startPlayback();
+                    commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.LOAD_FILE, filePath ) );
+                    commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PLAY, null ) );
                 } catch (MusicException ex) {
                     new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
                 }
-            } else {
+            } else {//last
                 System.out.println("There are no more songs in the playlist.");
-                String file_path = selectedPlaylist.getMp3List().getSelectedValue();
+                String filePath = selectedPlaylist.getMp3List().getSelectedValue();
 
-                playbackManager.resetPlayback();
                 pause = false;
 
                 try {
-                    playbackManager.setMusic(file_path);
-                    playbackManager.startPlayback();
+                    commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.LOAD_FILE, filePath ) );
+                    commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PLAY, null ) );
                 } catch (MusicException ex) {
                     new ApoloPopUp().showError(ex.getMessage(), ex.getErrorName());
                 }
@@ -215,7 +197,7 @@ public class PlaybackController {
 
 
     public void handleMusicChange(JButton playButton, Playlist selectedPlaylist) {
-        if (playbackManager.isPlaying()) {
+        if (player.isPlaying()) {
             playButton.setIcon(getIcon("/icons/48_circle_pause_icon.png", 43, 43));
         }
         else {

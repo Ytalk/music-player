@@ -1,6 +1,7 @@
 package com.apolo.model;
 
-import com.apolo.gui.ApoloListCellRenderer;
+import com.apolo.model.exception.MusicException;
+import com.apolo.view.ApoloListCellRenderer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,7 +23,6 @@ import java.awt.BorderLayout;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
@@ -192,7 +192,7 @@ public class PlaylistManager implements Serializable {
             manager = ( (PlaylistManager) reader.readObject() );//lê os objetos serializados do arquivo e guarda dentro da classe que representa ela mesma
         }
         catch (FileNotFoundException e){
-            JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "The serialized file containing playlists was not found!", "Playlist Not Found", JOptionPane.WARNING_MESSAGE);
         }
         catch (IOException | ClassNotFoundException e) {
             throw new MusicException(e.getMessage(), "Something went wrong loading the playlists!");

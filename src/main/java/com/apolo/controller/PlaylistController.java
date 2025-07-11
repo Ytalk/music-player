@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.apolo.gui.ApoloPopUp;
-import com.apolo.model.MusicException;
+import com.apolo.view.ApoloPopUp;
+import com.apolo.model.exception.MusicException;
 import com.apolo.model.Playlist;
 import com.apolo.model.PlaylistManager;
 

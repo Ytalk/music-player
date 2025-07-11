@@ -1,8 +1,8 @@
-package com.apolo.gui;
+package com.apolo.view;
 
 import com.apolo.controller.PlaybackController;
 import com.apolo.controller.PlaylistController;
-import com.apolo.model.MusicException;
+import com.apolo.model.exception.MusicException;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -130,7 +130,7 @@ public class Apolo extends JFrame {
             }
 
             private void updateIcon(int size) {
-                String iconName = playbackController.getPlaybackManager().isPlaying() ? "/icons/48_circle_pause_icon.png" : "/icons/48_circle_play_icon.png";
+                String iconName = playbackController.getJLayerAudioPlayer().isPlaying() ? "/icons/48_circle_pause_icon.png" : "/icons/48_circle_play_icon.png";
                 playButton.setIcon( playbackController.getIcon(iconName, size, size) );
             }
         });
@@ -197,7 +197,7 @@ public class Apolo extends JFrame {
         });
 
 
-        playbackController.getPlaybackManager().addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
+        playbackController.getJLayerAudioPlayer().addChangeListener(evt -> {//play, pause (icons) and play in sequence or with repeat
             playbackController.handleMusicChange(playButton, playlistController.getSelectedPlaylist());
             durationLabel.setText( playbackController.getMusicDuration() );
         });

@@ -1,6 +1,6 @@
 package com.apolo.model;
 
-import com.apolo.gui.ApoloTaggerListCellRenderer;
+import com.apolo.view.ApoloTaggerListCellRenderer;
 
 import java.io.Serializable;
 
