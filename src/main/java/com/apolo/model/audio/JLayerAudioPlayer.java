@@ -10,12 +10,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.Timer;
 
 import com.apolo.model.exception.MusicException;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import com.apolo.model.util.AudioMetadataReader;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.advanced.AdvancedPlayer;
@@ -27,35 +22,35 @@ import javazoom.jl.player.advanced.PlaybackListener;
  * It implements the `Runnable` interface to enable multithreading for playback.
  */
 public class JLayerAudioPlayer {
+    private static final int FRAME_RATE = 45;
+    private boolean isPlaying = false;
+    private AdvancedPlayer player;
 
-    private boolean isPlaying = false; // Flag to indicate whether the player is currently playing
-    private ChangeListener changeListener; // Listener for state change events
-    private AdvancedPlayer player; // The player responsible for audio playback
-    protected File file; // The audio file to be played
-    private Timer frameTimer;
-
-    private int currentFrame = 0; // Current frame position within the audio file
-    private double duration;
-    private String formatDuration;
-
+    private ChangeListener changeListener;//listener for state change events
     private ProgressListener progressListener;//bar and time
+
+    private int currentFrame = 0;
+    protected File currentFile;
+    private Timer progressTimer;
 
     private FileInputStream fileInputStream = null;
     private BufferedInputStream bufferedInputStream = null;
 
+    private double duration;
 
-    public void seek(double timeInSeconds) throws MusicException {
-        setPlaybackFrame(timeInSeconds);////update currentFrame
+    /**
+     * Sets the audio file to be played by the music player.
+     *
+     * @param filePath The path to the audio file to be played.
+     * @throws MusicException If the specified file path is null or if the file does not exist.
+     */
+    public void setMusic(String filePath) throws MusicException {
+        if (filePath == null) throw new MusicException("Select a song first", "Null Path");
+        currentFile = new File(filePath);
+        if (!currentFile.exists()) throw new MusicException("Song not found: " + filePath, "Path does not exist");
 
-        System.out.println("fecha");
-        closeStreams();
-
-        //if (isPlaying) {
-            System.out.println("Seeking to " + timeInSeconds + "s and resuming playback.");
-            resume();
-        //} else {
-          //  System.out.println("Seeking to " + timeInSeconds + "s. Player remains paused.");
-        //}
+        duration = AudioMetadataReader.getDuration(filePath);
+        resetPlayback();//reset current frame when new music is set
     }
 
 
@@ -63,15 +58,13 @@ public class JLayerAudioPlayer {
      * Starts playback of the audio file.
      */
     public void play() throws MusicException {
-        closeStreams();////
         openPlayerStreams();
 
-        resetPlayback();
         playbackListener();
-
-        System.out.println("Playback started!");
-        isPlaying = true; //mark as playing
+        isPlaying = true;
+        //System.out.println("Playback started!");
         fireStateChanged(); //notify listeners of state change
+
         startProgressWatcher();
 
         try {
@@ -90,10 +83,10 @@ public class JLayerAudioPlayer {
         openPlayerStreams();
 
         playbackListener();
-
-        System.out.println("Resumed playback");
         isPlaying = true;
+        //System.out.println("Resumed playback");
         fireStateChanged();
+
         startProgressWatcher();
 
         try {
@@ -115,40 +108,22 @@ public class JLayerAudioPlayer {
             if (player != null) {
                 player.close();
             }
-
-            if (frameTimer != null) {
-                frameTimer.stop();
-            }
-
-            isPlaying = false;
-
-            fireStateChanged();
-            closeStreams();////
             System.out.println("Playback is over!");
         }
     }
 
-
-    /**
-     * Stops playback of the audio file and resets the playback position to the beginning.
-     */
-    /*public void stop() {
-        if (isPlaying || player != null) { //para se estiver tocando ou houver um player ativo
-            System.out.println("Stopping playback...");
-            if (player != null) {
-                player.close();
-            }
-            //cleanupPlayer();
-            //resetPlayback();
-            System.out.println("Playback stopped");
-        }
-    }*/
-
+    private void cleanupPlayer() {
+        if (progressTimer != null) progressTimer.stop();
+        closeStreams();
+        isPlaying = false;
+        fireStateChanged();
+        System.out.println("Playback state cleaned up.");
+    }
 
     /**
      * Resets the frame counter, progress bar and progress label to zero.
      */
-    public void resetPlayback() {
+    private void resetPlayback() {
         currentFrame = 0;
         //notifica o Controller para atualizar a View
         if (progressListener != null) {
@@ -156,51 +131,35 @@ public class JLayerAudioPlayer {
         }
     }
 
-    private void cleanupPlayer() {
-        isPlaying = false;
-        frameTimer.stop();
-        closeStreams();
-        fireStateChanged();
-        System.out.println("Playback state cleaned up.");
-    }
-
     //set up a playback listener to handle playback events
     private void playbackListener() {
         player.setPlayBackListener(new PlaybackListener() {
             @Override
             public void playbackFinished(PlaybackEvent evt) {
-                //player.close();
-                //closeStreams();
-                //frameTimer.stop();
                 resetPlayback();
                 System.out.println("Playback complete!");
-                //isPlaying = false;
-                //fireStateChanged();
             }
         });
     }
 
+    public void seek(double timeInSeconds) throws MusicException {
+        currentFrame = (int) (timeInSeconds * FRAME_RATE);//45 frames per second
 
-    /**
-     * Sets the audio file to be played by the music player.
-     *
-     * @param filePath The path to the audio file to be played.
-     * @throws MusicException If the specified file path is null or if the file does not exist.
-     */
-    public void setMusic(String filePath) throws MusicException {
-        //validate and set currentFile
-        if (filePath == null) throw new MusicException("Select a song first", "Null Path");
-        file = new File(filePath);
-        if (!file.exists()) throw new MusicException("Song not found: " + filePath, "Path does not exist");
+        System.out.println("fecha");
+        closeStreams();
 
-        duration = getMP3Duration(filePath);
-        ////resetPlayback(); //reset current frame when new music is set
-        ////closeStreamsAndPlayer(); //close any existing player/streams before setting new music
+        //if (isPlaying) {
+        System.out.println("Seeking to " + timeInSeconds + "s and resuming playback.");
+        resume();
+        //} else {
+        //  System.out.println("Seeking to " + timeInSeconds + "s. Player remains paused.");
+        //}
     }
+
 
     private void openPlayerStreams() throws MusicException {
         try { //create a new FileInputStream and wrap it in a BufferedInputStream
-            fileInputStream = new FileInputStream(file);//create a FileInputStream and wrap it in a BufferedInputStream
+            fileInputStream = new FileInputStream(currentFile);//create a FileInputStream and wrap it in a BufferedInputStream
             bufferedInputStream = new BufferedInputStream(fileInputStream);
             player = new AdvancedPlayer(bufferedInputStream);//initialize the AdvancedPlayer with the BufferedInputStream
         } catch (IOException e) {
@@ -224,8 +183,6 @@ public class JLayerAudioPlayer {
         bufferedInputStream = null;
         fileInputStream = null;
     }
-
-
 
 
     /**
@@ -260,57 +217,22 @@ public class JLayerAudioPlayer {
      * Starts a progress watcher to monitor the playback progress of the music and update the GUI accordingly.
      */
     private void startProgressWatcher() {
-        frameTimer = new Timer(1000, e -> {
-            currentFrame += 45;
+        progressTimer = new Timer(1000, e -> {
+            currentFrame += FRAME_RATE;
 
-            double progressSeconds = (double) currentFrame / 45;
-
-            int minutes = (int) (progressSeconds / 60);
-            int seconds = (int) (progressSeconds % 60);
-            String formattedProgressText = String.format("%02d:%02d", minutes, seconds);
+            int secs = currentFrame / FRAME_RATE;
+            String formattedProgressText = String.format("%02d:%02d", secs / 60, secs % 60);
 
             //calculate the progress as a percentage relative to the total duration
-            double progressBarValue = (progressSeconds / duration) * 100;
+            int progressBarValue = (int) ((secs / duration) * 100);
 
             //notifica o Controller sobre a atualização
             if (progressListener != null) {
-                progressListener.onProgressUpdate((int) progressBarValue, formattedProgressText);
+                progressListener.onProgressUpdate(progressBarValue, formattedProgressText);
             }
+
         });
-        frameTimer.start();
-    }
-
-
-    /**
-     * Retrieves the duration of an MP3 audio file in seconds and updates the progress label with the formatted duration.
-     *
-     * @param filePath The path to the MP3 audio file.
-     * @return The duration of the audio file in seconds.
-     */
-    private double getMP3Duration(String filePath) {////////////////////////////////////////////
-        try {
-            AudioFile audioFile = AudioFileIO.read(new File(filePath));
-            int trackLength = audioFile.getAudioHeader().getTrackLength();//track duration in seconds
-
-            int minutes = trackLength / 60;
-            int seconds = trackLength % 60;
-            formatDuration = String.format("%02d:%02d", minutes, seconds);
-
-            return trackLength;
-        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    
-    /**
-     * Retrieves the formatted duration of the MP3 audio file.
-     *
-     * @return The formatted duration of the MP3 audio file as "mm:ss".
-     */
-    public String getFormatDuration() {
-        return formatDuration;
+        progressTimer.start();
     }
 
     public double getDuration(){
@@ -319,10 +241,6 @@ public class JLayerAudioPlayer {
 
     public void setProgressListener(ProgressListener listener) {
         this.progressListener = listener;
-    }
-
-    public void setPlaybackFrame(double newTime) {
-        currentFrame = (int) (newTime * 45); //45 frames per second
     }
 
 }

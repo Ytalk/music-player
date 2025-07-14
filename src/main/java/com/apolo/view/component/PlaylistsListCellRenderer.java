@@ -1,4 +1,4 @@
-package com.apolo.view;
+package com.apolo.view.component;
 
 import java.io.Serializable;
 
@@ -10,14 +10,15 @@ import javax.swing.JList;
 
 
 /**
- * Custom list cell renderer for displaying elements in a JList (mainList) with alternating background colors.
- * Background color alternates between two colors for better visual distinction.
+ * Custom list cell renderer for displaying playlists names in a JList (mainList/playlistsList) with background alternating between two colors.
  */
-public class ApoloListCellRenderer extends DefaultListCellRenderer implements Serializable {
+public class PlaylistsListCellRenderer extends DefaultListCellRenderer implements Serializable {
     private static final long serialVersionUID = 6L;
 
     /**
-     * Overrides the getListCellRendererComponent method to customize the appearance of list cells.
+     * Overrides the {@code getListCellRendererComponent} method to customize the appearance of list cells.
+     * This method is responsible for setting the background and foreground colors of each cell
+     * based on its selection state and index (for alternating row colors).
      *
      * @param list           The JList object being rendered.
      * @param value          The value to be rendered.

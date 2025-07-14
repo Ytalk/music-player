@@ -1,7 +1,7 @@
 package com.apolo.model;
 
 import com.apolo.model.exception.MusicException;
-import com.apolo.view.ApoloListCellRenderer;
+import com.apolo.view.component.PlaylistsListCellRenderer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,7 +59,7 @@ public class PlaylistManager implements Serializable {
         // Initialize main list of playlists
         mainList = new JList<>();
         mainList.setBackground(new Color(64, 64, 64));
-        mainList.setCellRenderer(new ApoloListCellRenderer());
+        mainList.setCellRenderer(new PlaylistsListCellRenderer());
         scrollPlaylists = new JScrollPane(mainList);
         scrollPlaylists.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 

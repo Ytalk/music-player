@@ -1,8 +1,7 @@
-package com.apolo.view;
+package com.apolo.view.component;
 
-import com.apolo.model.MusicMetadata;
+import com.apolo.model.util.AudioMetadataReader;
 
-import java.io.File;
 import java.io.Serializable;
 
 import java.awt.Component;
@@ -17,14 +16,17 @@ import javax.swing.JPanel;
 import javax.swing.BorderFactory;
 
 /**
- * Custom list cell renderer for displaying music information in a JList with alternating background colors.
- * Uses JAudioTagger to retrieve and display music information in an organized way.
+ * Custom list cell renderer for displaying music information in a JList (mp3pathlist/musicList) with background alternating between two colors.
+ * Uses {@link AudioMetadataReader} to retrieve and display music information in an organized way.
  */
-public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer implements Serializable {
+public class MusicListCellRenderer extends DefaultListCellRenderer implements Serializable {
     private static final long serialVersionUID = 6L;
 
     /**
-     * Overrides the getListCellRendererComponent method to customize the appearance of list cells.
+     * Overrides the {@code getListCellRendererComponent} method to customize the appearance of list cells.
+     * This method is called for each cell to render its content. It creates a JPanel with a BorderLayout
+     * and populates it with music metadata if the value is a file path string. It also handles
+     * alternating row colors and selection highlighting.
      *
      * @param list           The JList object being rendered.
      * @param value          The value to be rendered.
@@ -42,24 +44,20 @@ public class ApoloTaggerListCellRenderer extends DefaultListCellRenderer impleme
 
         if (value instanceof String) {
             String filePath = (String) value;
-            String fileName = new File(filePath).getName().replaceFirst("[.][^.]+$", "");
-
-            MusicMetadata metadata = new MusicMetadata(filePath);
-            ImageIcon albumArt = metadata.getMP3AlbumArtwork();
-            String title = metadata.getMP3Title();
-            String duration = metadata.getMP3Duration();
+            ImageIcon albumArt = AudioMetadataReader.getCoverArt(filePath);
+            String title = AudioMetadataReader.getTitle(filePath);
+            String duration = AudioMetadataReader.getFormattedDuration(filePath);
 
             JPanel infoPanel = new JPanel(new BorderLayout());
             infoPanel.setBackground(musicPanel.getBackground());
 
-            JLabel titleLabel = new JLabel(metadata.getMP3Title());//*
-            //JLabel titleLabel = new JLabel(title != null && !title.isEmpty() ? title : fileName);
-            titleLabel.setForeground(Color.BLACK);
-            infoPanel.add(titleLabel, BorderLayout.CENTER);
-
             JLabel durationLabel = new JLabel(duration);
             durationLabel.setForeground(Color.BLACK);
             infoPanel.add(durationLabel, BorderLayout.EAST);
+
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setForeground(Color.BLACK);
+            infoPanel.add(titleLabel, BorderLayout.CENTER);
 
             if (albumArt != null) {
                 JLabel albumArtLabel = new JLabel(albumArt);

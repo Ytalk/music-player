@@ -1,5 +1,6 @@
 package com.apolo.controller;
 
+import com.apolo.model.util.AudioMetadataReader;
 import com.apolo.model.audio.AudioCommandExecutor;
 import com.apolo.model.audio.JLayerAudioPlayer;
 import com.apolo.model.command.AudioCommand;
@@ -58,7 +59,7 @@ public class PlaybackController {
         progressBar.setValue(progressBarVal);
 
         //creates a new progress time according to the bar percentage and music duration
-        double newTime = (progressBarVal / 100.0) * player.getDuration();
+        double newTime = (progressBarVal / 100.0) * AudioMetadataReader.getDuration(currentFilePath);//player.getDuration()
 
         pause = true;
         player.pause();
@@ -110,14 +111,19 @@ public class PlaybackController {
 
 
     public String getMusicDuration(){
-        return player.getFormatDuration();
+        return AudioMetadataReader.getFormattedDuration(currentFilePath);
     }
 
 
-    public void skipMusic(int nextOrPrevious, Playlist selectedPlaylist){
+    public synchronized void skipMusic(int nextOrPrevious, Playlist selectedPlaylist) {
         pause = true;
         //commandExecutor.enqueueCommand( new AudioCommand( AudioCommandType.PAUSE, null ) );
-        player.pause();
+        //while (true){
+            if(player.isPlaying()){
+                player.pause();
+          //      break;
+            }
+        //}
 
         try {
             if (selectedPlaylist == null)
@@ -205,6 +211,7 @@ public class PlaybackController {
 
             if (!pause) {//entra aqui quando termina e não quando pausa
                 if (selectedPlaylist != null) {
+                    System.out.println("terminou, e agora?");
                     handlePlaybackState(selectedPlaylist);
                 }
             }
@@ -219,6 +226,7 @@ public class PlaybackController {
         switch (currentRepeatState) {
             case INACTIVE:
                 if (currentIndex < playlistSize - 1) {
+                    System.out.println("bora de next");
                     skipMusic(1, selectedPlaylist);
                 }
                 break;

@@ -1,6 +1,6 @@
 package com.apolo.model;
 
-import com.apolo.view.ApoloTaggerListCellRenderer;
+import com.apolo.view.component.MusicListCellRenderer;
 
 import java.io.Serializable;
 
@@ -49,7 +49,7 @@ public class Playlist implements Serializable {
         listModel = new DefaultListModel<>();
         mp3pathlist = new JList<>();
         mp3pathlist.setModel(listModel);
-        mp3pathlist.setCellRenderer(new ApoloTaggerListCellRenderer());
+        mp3pathlist.setCellRenderer(new MusicListCellRenderer());
         mp3pathlist.setBackground(new Color(64, 64, 64));
         mp3pathlist_scroll = new JScrollPane(mp3pathlist);
         mp3pathlist_scroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
